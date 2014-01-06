@@ -7,7 +7,7 @@
     <meta content="" name="description">
     <meta content="" name="author">
 
-    <title>Arsene</title>
+    <title>Finances des collectivités territoriales</title>
 
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
@@ -37,15 +37,8 @@
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li ng-class="{ active: $state.includes('maps') }"><a ui-sref="maps.list">Cartes</a></li>
-            <li ng-class="{ active: $state.includes('finances') }"><a ui-sref="finances.list">Finance par commune</a></li>
+            <li ng-class="{ active: $state.includes('maps') }"><a ui-sref="maps.list">Cartographies</a></li>
           </ul>
-          <form class="navbar-form navbar-left" role="search">
-            <div class="form-group">
-              <input type="text" class="form-control" placeholder="Trouver une commune">
-            </div>
-            <button type="submit" class="btn btn-default">Go!</button>
-          </form>
         </div>
       </div>
     </div>

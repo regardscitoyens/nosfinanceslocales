@@ -3,11 +3,11 @@ angular.module('app', ['ui.router'])
         [ '$stateProvider', '$urlRouterProvider',
         function ($stateProvider, $urlRouterProvider) {
             $urlRouterProvider
-                .otherwise('/');
+                .otherwise('/maps');
             $stateProvider
-                .state('home', {
-                    url: '/',
-                    templateUrl: '/static/templates/home.html',
+                .state('about', {
+                    url: '/about',
+                    templateUrl: '/static/templates/about.html',
                     // You can pair a controller to your template. There *must* be a template to pair with.
                     controller: 'HomeCtrl'
                 })
@@ -64,9 +64,11 @@ angular.module('app', ['ui.router'])
                 tileUrl: "http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/998/256/{z}/{x}/{y}.png",
                 gridUrl: 'http://{s}.tiles.mapbox.com/v3/mapbox.geography-class/{z}/{x}/{y}.grid.json?callback={cb}'
             }
-            $scope.onClick = function(e) {
+            $scope.onClick = function(data) {
+                console.log(e.data);
             }
-            $scope.onMouseOver = function(e) {
+            $scope.onMouseOver = function(data) {
+                console.log("yo");
             }
         }])
     .directive('leafletMap', function () {
@@ -75,36 +77,37 @@ angular.module('app', ['ui.router'])
             replace: false,
             scope: {
                 mapData: '=',
-                onClick: '&',
-                onMouseOver: '&',
-                onMouseOut: '&',
+                click: '&onClick',
+                mouseOver: '&onMouseOver',
+                mouseOut: '&onMouseOut',
             },
             link: function($scope, element, attrs, controller) {
+                var onClick = $scope.click(),
+                    onMouseOver = $scope.mouseOver(),
+                    onMouseOut = $scope.mouseOut();
                 element[0].width = '100%';
                 var cloudmadeAttribution = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade',
-                    cloudmade = new L.TileLayer(mapData.tileUrl, {attribution: cloudmadeAttribution});
-                var utfGrid = new L.UtfGrid(mapData.gridUrl);
+                    cloudmade = new L.TileLayer($scope.mapData.tileUrl, {attribution: cloudmadeAttribution});
+                var utfGrid = new L.UtfGrid($scope.mapData.gridUrl);
 
                 var interactiveLayerGroup = L.layerGroup([cloudmade, utfGrid]);
 
                 //Events
                 utfGrid.on('click', function (e) {
                     if (e.data) {
-                        $scope.onClick(e)
+                        onClick(e.data)
                     } else {
                     }
                 });
                 utfGrid.on('mouseover', function (e) {
                     if (e.data) {
-                        $scope.onMouseOver(e)
+                        onMouseOver(e.data)
                     } else {
                     }
                 });
                 utfGrid.on('mouseout', function (e) {
-                        $scope.onMouseOut(e)
-                    } else {
+                    onMouseOut()
                 });
-
 
                 //Create our map with just the base TileLayer
                 var map = L.map(element[0])
