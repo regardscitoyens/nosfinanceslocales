@@ -26,7 +26,7 @@ setup(name='localgouv',
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    install_requires=['cornice', 'waitress'],
+    install_requires=['zope.sqlalchemy', 'sqlalchemy', 'cornice', 'waitress', 'geoalchemy2', 'brewer2mpl', 'fiona', 'shapely', 'numpy', 'pandas', 'psycopg2'],
     entry_points = """\
     [paste.app_factory]
     main = localgouv:main
