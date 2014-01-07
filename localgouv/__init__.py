@@ -13,7 +13,10 @@ def main(global_config, **settings):
     DBSession.configure(bind=engine)
     Base.metadata.bind = engine
     config = Configurator(settings=settings)
-    config.add_static_view('static', 'static', cache_max_age=3600)
+    # for dev purpose
+    config.add_static_view('static', 'client_app/static', cache_max_age=3600)
+    config.add_static_view('templates', 'client_app/templates', cache_max_age=3600)
+    config.add_view('localgouv.views.index', route_name='index')
     config.add_route('index', '/')
     config.include("cornice")
     config.scan("localgouv.views")

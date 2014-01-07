@@ -19,6 +19,7 @@ from ..mapnik_render import render_tiles
 from ..models import (
     DBSession,
     AdminZoneFinance,
+    AdminZone,
 )
 
 def carto_convert(data):
@@ -49,14 +50,12 @@ def main(argv=sys.argv):
 
     years = zip(*DBSession.query(AdminZoneFinance.year).distinct().all())[0]
 
-    for key in MAP_VARIABLES.keys():
+    for var_name in MAP_VARIABLES.keys():
         for year in years:
-            m = Map(year, key, settings['base_mss_dir'])
-            extent = m.config['Layer'][0]['Datasource']['extent']
-            open('test.mml', 'w').write(json.dumps(m.toJSON(), indent=2))
-            xmlmap = carto_convert(m.toJSON())
-            open('xmlmap.xml', 'w').write(xmlmap)
-            map_tile_dir = os.path.join(settings['base_tile_dir'], str(year), key) + '/'
+            m = Map(year, var_name)
+            extent = m.info['extent']
+            xmlmap = carto_convert(m.mapnik_config)
+            map_tile_dir = os.path.join(settings['base_tile_dir'], m.info['id']) + '/'
             render_tiles(extent, xmlmap, map_tile_dir, m.config['minzoom'], m.config['maxzoom'], name=m.config['name'])
 
 
