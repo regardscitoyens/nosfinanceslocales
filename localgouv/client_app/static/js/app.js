@@ -7,7 +7,7 @@ angular.module('app', ['ui.router'])
             $stateProvider
                 .state('about', {
                     url: '/about',
-                    templateUrl: '/static/templates/about.html',
+                    templateUrl: 'templates/about.html',
                     // You can pair a controller to your template. There *must* be a template to pair with.
                     controller: 'HomeCtrl'
                 })
@@ -15,7 +15,7 @@ angular.module('app', ['ui.router'])
                     url: '/{id:[0-9]{1,4}}',
                     views: {
                         '': {
-                            templateUrl: '/static/templates/localfinance.detail.html',
+                            templateUrl: 'templates/localfinance.detail.html',
                             controller: 'LocalFinanceDetailCtrl'
                         },
                     }
@@ -25,7 +25,7 @@ angular.module('app', ['ui.router'])
                     url: '/maps',
                     views: {
                         '': {
-                            templateUrl: '/static/templates/maps.html',
+                            templateUrl: 'templates/maps.html',
                         }
                     }
                 })
@@ -33,7 +33,7 @@ angular.module('app', ['ui.router'])
                     url: '/',
                     views: {
                         '': {
-                            templateUrl: '/static/templates/map.list.html',
+                            templateUrl: 'templates/map.list.html',
                             controller: 'MapListCtrl'
                         }
                     },
@@ -42,7 +42,7 @@ angular.module('app', ['ui.router'])
                     url: '/{id}',
                     views: {
                         '': {
-                            templateUrl: '/static/templates/map.detail.html',
+                            templateUrl: 'templates/map.detail.html',
                             controller: 'MapDetailCtrl'
                         }
                     }
@@ -61,7 +61,8 @@ angular.module('app', ['ui.router'])
     .controller('MapDetailCtrl', ['$scope', '$state', '$http',
         function($scope, $state, $http) {
             $scope.mapData = {
-                tileUrl: "http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/998/256/{z}/{x}/{y}.png",
+                baseTileUrl: "http://{s}.tile.cloudmade.com/BC9A493B41014CAABB98F0471D759707/998/256/{z}/{x}/{y}.png",
+                tileUrl: "http://www.localfinance.fr/tiles/debt_per_person_2007/{z}/{x}/{y}.png",
                 gridUrl: 'http://{s}.tiles.mapbox.com/v3/mapbox.geography-class/{z}/{x}/{y}.grid.json?callback={cb}'
             }
             $scope.onClick = function(data) {
@@ -87,10 +88,11 @@ angular.module('app', ['ui.router'])
                     onMouseOut = $scope.mouseOut();
                 element[0].width = '100%';
                 var cloudmadeAttribution = 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2011 CloudMade',
-                    cloudmade = new L.TileLayer($scope.mapData.tileUrl, {attribution: cloudmadeAttribution});
-                var utfGrid = new L.UtfGrid($scope.mapData.gridUrl);
+                    cloudmade = new L.TileLayer($scope.mapData.baseTileUrl, {attribution: cloudmadeAttribution}),
+                    mylyr = new L.TileLayer($scope.mapData.tileUrl),
+                    utfGrid = new L.UtfGrid($scope.mapData.gridUrl);
 
-                var interactiveLayerGroup = L.layerGroup([cloudmade, utfGrid]);
+                var interactiveLayerGroup = L.layerGroup([cloudmade, mylyr, utfGrid]);
 
                 //Events
                 utfGrid.on('click', function (e) {
