@@ -34,7 +34,7 @@ ADMIN_LEVEL_CITY = 5
 ADMIN_LEVEL_CITY_ARR = 6
 
 class AdminZone(Base):
-    # XXX: Only cities at the moment"""
+    # XXX: Only cities and cities arr at the moment"""
     __tablename__ = 'adminzone'
     id = Column(Integer, primary_key=True)
     admin_level = Column(SmallInteger)

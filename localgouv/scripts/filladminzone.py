@@ -5,8 +5,10 @@ import json
 
 from fiona import collection
 from shapely.geometry import shape, MultiPolygon
+from shapely.ops import cascaded_union
+from shapely.wkt import loads
 
-from sqlalchemy import engine_from_config
+from sqlalchemy import engine_from_config, func
 
 from pyramid.paster import (
     get_appsettings,
@@ -19,6 +21,8 @@ from ..models import (
     DBSession,
     AdminZone,
     Base,
+    ADMIN_LEVEL_CITY,
+    ADMIN_LEVEL_CITY_ARR,
     )
 
 
@@ -33,10 +37,13 @@ def extract_adminzone_data(city):
     g = shape(city['geometry'])
     if g.type == 'Polygon':
         g = MultiPolygon([g])
+    admin_level = ADMIN_LEVEL_CITY
+    if '-ARRONDISSEMENT' in properties['NOM_COMM']:
+        admin_level = ADMIN_LEVEL_CITY_ARR
     return {'name': properties['NOM_COMM'],
             'code_department': properties['CODE_DEPT'],
             'code_city': properties['CODE_COMM'],
-            'admin_level': 5,
+            'admin_level': admin_level,
             'geometry': "SRID=4326;" + g.wkt}
 
 def main(argv=sys.argv):
@@ -57,6 +64,33 @@ def main(argv=sys.argv):
                 data = extract_adminzone_data(city)
                 az = AdminZone(**data)
                 DBSession.add(az)
+
+    cities_with_arr = [
+        {'name': 'PARIS',
+         'code_city': '056',
+         'code_department': '75'},
+        {'name': 'MARSEILLE',
+         'code_city': '055',
+         'code_department': '13'},
+        {'name': 'LYON',
+         'code_city': '123',
+         'code_department': '69'}
+    ]
+    import pdb
+    pdb.set_trace()
+    with transaction.manager:
+        for city in cities_with_arr:
+            wkt_geoms = zip(*DBSession.query(func.ST_AsText(AdminZone.geometry))\
+                .filter(AdminZone.name.contains(city['name']))\
+                .filter(AdminZone.admin_level==ADMIN_LEVEL_CITY)\
+                .all())[0]
+            city_geom = cascaded_union([loads(wkt_geom) for wkt_geom in wkt_geoms])
+            if city_geom.type == 'Polygon':
+                city_geom = MultiPolygon([city_geom])
+            az = AdminZone(**city)
+            az.geometry = city_geom.wkt
+            az.admin_level = ADMIN_LEVEL_CITY
+            DBSession.add(az)
 
 if __name__ == '__main__':
     main()

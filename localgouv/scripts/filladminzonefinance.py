@@ -53,8 +53,10 @@ def main(argv=sys.argv):
     DBSession.configure(bind=engine)
     code_az_id = dict(DBSession.query(AdminZone.code_insee, AdminZone.id).all())
     df = pd.read_csv(filename, encoding='utf-8')
-    df.code = df.code.astype('unicode')
-    df['az_id'] = df.code.apply(lambda c: code_az_id.get(c[-5:], None))
+    import pdb
+    pdb.set_trace()
+    df.insee_code = df.insee_code.astype('unicode')
+    df['az_id'] = df.insee_code.apply(lambda c: code_az_id.get(c, None))
     df = df[df.az_id.notnull()].reindex()
     size = df.shape[0]
     for i in range(11):
