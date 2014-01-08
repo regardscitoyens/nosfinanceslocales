@@ -28,7 +28,7 @@ from ..models import (
 
 def usage(argv):
     cmd = os.path.basename(argv[0])
-    print('usage: %s <config_uri> [var=value]\n'
+    print('usage: %s <config_uri> <filepath> [var=value]\n'
           '(example: "%s development.ini")' % (cmd, cmd))
     sys.exit(1)
 
@@ -50,16 +50,16 @@ def main(argv=sys.argv):
     if len(argv) < 2:
         usage(argv)
     config_uri = argv[1]
-    options = parse_vars(argv[2:])
+    filepath = argv[2]
+    options = parse_vars(argv[3:])
     setup_logging(config_uri)
     settings = get_appsettings(config_uri, options=options)
     engine = engine_from_config(settings, 'sqlalchemy.')
     DBSession.configure(bind=engine)
     Base.metadata.create_all(engine)
-    geofla_filepath = 'data/COMMUNES/COMMUNE_4326.SHP'
     with transaction.manager:
         # script
-        with collection(geofla_filepath) as cities:
+        with collection(filepath) as cities:
             for city in cities:
                 data = extract_adminzone_data(city)
                 az = AdminZone(**data)
@@ -76,8 +76,6 @@ def main(argv=sys.argv):
          'code_city': '123',
          'code_department': '69'}
     ]
-    import pdb
-    pdb.set_trace()
     with transaction.manager:
         for city in cities_with_arr:
             wkt_geoms = zip(*DBSession.query(func.ST_AsText(AdminZone.geometry))\
