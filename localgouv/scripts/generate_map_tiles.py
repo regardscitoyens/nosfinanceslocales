@@ -67,11 +67,19 @@ def main(argv=sys.argv):
             extent = m.info['extent']
             xmlmap = carto_convert(m.mapnik_config)
             map_tile_dir = os.path.join(settings['base_tile_dir'], m.info['id']) + '/'
+            try:
+                os.makedirs(map_tile_dir)
+            except OSError:
+                pass
             render_tiles(extent, xmlmap, map_tile_dir, m.info['minzoom'], m.info['maxzoom'], name=m.info['name'])
 
             # XXX: move this elsewhere...
             # create thumbnail of the map
             thumbnail_filepath = os.path.join(settings['static_app_dir'], 'thumbnail', m.info['id'])
+            try:
+                os.makedirs(thumbnail_filepath)
+            except OSError:
+                pass
             create_thumbnail(xmlmap, thumbnail_filepath)
 
 if __name__ == '__main__':
