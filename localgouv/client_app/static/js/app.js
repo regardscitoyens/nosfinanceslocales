@@ -1,15 +1,18 @@
 angular.module('app', ['ui.router'])
+    .constant('API_ROOT_URL', '/api')
     .config(
         [ '$stateProvider', '$urlRouterProvider',
         function ($stateProvider, $urlRouterProvider) {
             $urlRouterProvider
                 .otherwise('/maps');
             $stateProvider
+                .state('home', {
+                    url: '/',
+                    templateUrl: 'templates/home.html',
+                })
                 .state('about', {
                     url: '/about',
                     templateUrl: 'templates/about.html',
-                    // You can pair a controller to your template. There *must* be a template to pair with.
-                    controller: 'HomeCtrl'
                 })
                 .state('localfinance', {
                     url: '/{id:[0-9]{1,4}}',
@@ -36,7 +39,7 @@ angular.module('app', ['ui.router'])
                             templateUrl: 'templates/map.list.html',
                             controller: 'MapListCtrl'
                         }
-                    },
+                    }
                 })
                 .state('maps.detail', {
                     url: '/{id}',
@@ -48,15 +51,19 @@ angular.module('app', ['ui.router'])
                     }
                 });
         }])
-    .controller('Home', ['$scope', '$state', '',
+    .controller('Home', ['$scope', '$state',
         function($scope, $state) {
             $scope.$state = $state;
     }])
     .controller('MapsCtrl', ['$scope', '$state', '$http',
-        function($scope, $state, $http) {
+        function($scope, $state, $http, maps) {
         }])
-    .controller('MapListCtrl', ['$scope', '$state', '$http',
-        function($scope, $state, $http) {
+    .controller('MapListCtrl', ['$scope', '$state', '$http', 'API_ROOT_URL',
+        function($scope, $state, $http, API_ROOT_URL) {
+            $http.get(API_ROOT_URL + '/timemaps')
+                .success(function(data){
+                    $scope.maps = data.results;
+            });
         }])
     .controller('MapDetailCtrl', ['$scope', '$state', '$http',
         function($scope, $state, $http) {

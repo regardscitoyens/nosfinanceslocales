@@ -2,7 +2,7 @@
 import transaction
 import json
 import os, sys
-
+import mapnik
 
 from pyramid.paster import (
     get_appsettings,
@@ -39,6 +39,17 @@ def usage(argv):
           '(example: "%s development.ini")' % (cmd, cmd))
     sys.exit(1)
 
+def create_thumbnail(xmlmap, filepath):
+    shape = (140, 140)
+    m = mapnik.Map(*shape)
+    mapnik.load_map_from_string(m, xmlmap)
+    box2d = m.layers[0].envelope()
+    m.zoom_to_box(box2d)
+    im = mapnik.Image(*shape)
+    mapnik.render(m, im)
+    im.save(filepath)
+
+
 def main(argv=sys.argv):
     if len(argv) < 2:
         usage(argv)
@@ -50,14 +61,18 @@ def main(argv=sys.argv):
 
     years = zip(*DBSession.query(AdminZoneFinance.year).distinct().all())[0]
 
-    for var_name in MAP_VARIABLES.keys():
+    for var_name in MAPS_CONFIG.keys():
         for year in years:
             m = Map(year, var_name)
             extent = m.info['extent']
             xmlmap = carto_convert(m.mapnik_config)
             map_tile_dir = os.path.join(settings['base_tile_dir'], m.info['id']) + '/'
-            render_tiles(extent, xmlmap, map_tile_dir, m.config['minzoom'], m.config['maxzoom'], name=m.config['name'])
+            render_tiles(extent, xmlmap, map_tile_dir, m.info['minzoom'], m.info['maxzoom'], name=m.info['name'])
 
+            # XXX: move this elsewhere...
+            # create thumbnail of the map
+            thumbnail_filepath = os.path.join(settings['static_app_dir'], 'thumbnail', m.info['id'])
+            create_thumbnail(xmlmap, thumbnail_filepath)
 
 if __name__ == '__main__':
     main()

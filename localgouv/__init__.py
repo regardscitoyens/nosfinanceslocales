@@ -19,5 +19,6 @@ def main(global_config, **settings):
     config.add_view('localgouv.views.index', route_name='index')
     config.add_route('index', '/')
     config.include("cornice")
+    config.route_prefix = '/api'
     config.scan("localgouv.views")
     return config.make_wsgi_app()

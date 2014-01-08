@@ -12,7 +12,7 @@ POP_VAR = cast(AdminZoneFinance.data['population'], Float)
 
 MAPS_CONFIG = {
     'debt_per_person': {
-        'description': u'Dette par habitant en €',
+        'description': u'Dette par commune par habitant en €',
         'sql_variable': cast(AdminZoneFinance.data['debt_annual_costs'], Float)/POP_VAR,
         'sql_filter': POP_VAR > 0,
     }

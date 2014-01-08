@@ -33,11 +33,12 @@
     <div role="navigation" class="navbar navbar-default">
       <div class="container">
         <div class="navbar-header">
-          <a ui-sref="home" class="navbar-brand">Finances locales</a>
+          <a ui-sref="home" class="navbar-brand">Localgouv</a>
         </div>
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li ng-class="{ active: $state.includes('maps') }"><a ui-sref="maps.list">Cartographies</a></li>
+            <li ng-class="{ active: $state.includes('about') }"><a ui-sref="about">A propos</a></li>
           </ul>
         </div>
       </div>

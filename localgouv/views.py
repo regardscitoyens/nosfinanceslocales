@@ -15,15 +15,15 @@ def get_info(request):
     term = self.request.matchdict['term']
     result = DBSession.query(AdminZone.id, AdminZone.name, AdminZone.code_insee).filter()
 
-@resource(collection_path='/maps', path='/map/{id}')
-class Maps(object):
+@resource(collection_path='/timemaps', path='/timemap/{id}')
+class TimeMap(object):
     def __init__(self, request):
         self.request = request
     def get(self):
         id = self.request.matchdict['id']
-        return {'results': [m.info for m in map_registry[id]].info}
+        return {'results': {'var_name': id, 'maps': [m.info for m in map_registry[id]]}}
     def collection_get(self):
-        return {'results': [m.info for key in MAPS_CONFIG.keys() for m in map_registry[key]]}
+        return {'results': [{'var_name': key, 'maps': [m.info for m in map_registry[key]]} for key in MAPS_CONFIG.keys()]}
 
 @resource(collection_path='/finance', path='/finance/{id}')
 class AZFinance(object):

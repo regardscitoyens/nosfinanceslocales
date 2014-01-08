@@ -1,3 +1,11 @@
 <div class="row">
-  <a ui-sref="maps.detail({id:1})">Carte 1</a>
+  <div class="col-md-3" ng-repeat="map in maps">
+    <div class="thumbnail">
+      <img src="{{map.maps[0].thumbnail}}" alt="map" class="img-rounded" style="width: 200px; height: 200px;">
+      <div class="caption">
+        <h4><a ui-sref="maps.detail({id:map.var_name})">{{map.maps[0].description}}</a></h3>
+        <p> Info: quantiles, médians
+      </div>
+    </div>
+  </div>
 </div>
