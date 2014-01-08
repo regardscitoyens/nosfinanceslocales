@@ -4,7 +4,7 @@ import re
 import os
 import numpy as np
 import brewer2mpl
-from sqlalchemy import func, cast, Float, select, alias
+from sqlalchemy import func, cast, Float, select, alias, and_
 
 from .models import DBSession, AdminZone, AdminZoneFinance, SRID
 
@@ -14,7 +14,7 @@ MAPS_CONFIG = {
     'debt_per_person': {
         'description': u'Dette par commune par habitant en €',
         'sql_variable': cast(AdminZoneFinance.data['debt_annual_costs'], Float)/POP_VAR,
-        'sql_filter': POP_VAR > 0,
+        'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['debt_annual_costs'] <> 'nan'),
     }
 }
 
@@ -50,10 +50,10 @@ def quantile_scale(sql_variable, sql_filter, size):
 
 def get_extent():
     return DBSession.query(
-        func.min(func.xMin(AdminZone.geometry)),
-        func.min(func.yMin(AdminZone.geometry)),
-        func.max(func.xMax(AdminZone.geometry)),
-        func.max(func.yMax(AdminZone.geometry)),
+        func.min(func.ST_XMin(AdminZone.geometry)),
+        func.min(func.ST_YMin(AdminZone.geometry)),
+        func.max(func.ST_XMax(AdminZone.geometry)),
+        func.max(func.ST_XMax(AdminZone.geometry)),
     ).first()
 
 def france_layer(layer_id, query):
@@ -98,7 +98,7 @@ class Map(object):
     _scale_cache = {}
     def __init__(self, year, name):
         variables = MAPS_CONFIG.get(name)
-        query = map_query(year, variables['sql_variable'], variables['sql_filter'])
+        query = map_query(year, variables['sql_variable'].label(name), variables['sql_filter'])
         layer = "layer_%s"%name
 
         # style
