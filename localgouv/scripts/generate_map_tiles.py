@@ -13,7 +13,7 @@ from tempfile import NamedTemporaryFile
 import subprocess
 from sqlalchemy import engine_from_config
 
-from ..maps import Map, MAP_VARIABLES
+from ..maps import Map, MAPS_CONFIG
 from ..mapnik_render import render_tiles
 
 from ..models import (
@@ -43,12 +43,12 @@ def create_thumbnail(xmlmap, filepath):
     shape = (140, 140)
     m = mapnik.Map(*shape)
     mapnik.load_map_from_string(m, xmlmap)
-    box2d = m.layers[0].envelope()
-    m.zoom_to_box(box2d)
+    box = m.layers[0].envelope()
+    prj_box = box.forward(prj)
+    m.zoom_to_box(prj_box)
     im = mapnik.Image(*shape)
     mapnik.render(m, im)
-    im.save(filepath)
-
+    im.save(filepath, 'png256')
 
 def main(argv=sys.argv):
     if len(argv) < 2:
@@ -75,12 +75,12 @@ def main(argv=sys.argv):
 
             # XXX: move this elsewhere...
             # create thumbnail of the map
-            thumbnail_filepath = os.path.join(settings['static_app_dir'], 'thumbnail', m.info['id'])
+            thumbnail_filepath = os.path.join(settings['static_app_dir'], 'thumbnails')
             try:
                 os.makedirs(thumbnail_filepath)
             except OSError:
                 pass
-            create_thumbnail(xmlmap, thumbnail_filepath)
+            create_thumbnail(xmlmap, os.path.join(thumbnail_filepath, m.info['id']) + '.png')
 
 if __name__ == '__main__':
     main()
