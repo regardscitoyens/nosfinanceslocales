@@ -67,7 +67,7 @@ class RenderThread:
         self.tileproj = GoogleProjection(maxZoom+1)
 
         self.layer_id = layer_id
-        self.fields = fields
+        self.fields = fields or []
 
     def get_bbox(self, x, y, z):
         # Calculate pixel positions of bottom-left & top-right
@@ -139,7 +139,7 @@ class RenderThread:
 
 
 
-def render_tiles(bbox, xmlmap, tile_dir, minZoom=1,maxZoom=18, name="unknown", num_threads=NUM_THREADS, tms_scheme=False, fields=None):
+def render_tiles(bbox, xmlmap, tile_dir, minZoom=1,maxZoom=18, name="unknown", num_threads=NUM_THREADS, tms_scheme=False, fields=None, layer_id=0):
     print "render_tiles(",bbox, tile_dir, minZoom,maxZoom, name,")"
 
     # Launch rendering threads
@@ -147,7 +147,7 @@ def render_tiles(bbox, xmlmap, tile_dir, minZoom=1,maxZoom=18, name="unknown", n
     printLock = threading.Lock()
     renderers = {}
     for i in range(num_threads):
-        renderer = RenderThread(tile_dir, xmlmap, queue, printLock, maxZoom, fields or [])
+        renderer = RenderThread(tile_dir, xmlmap, queue, printLock, maxZoom, fields=fields, layer_id=layer_id)
         render_thread = threading.Thread(target=renderer.loop)
         render_thread.start()
         #print "Started render thread %s" % render_thread.getName()
