@@ -44,6 +44,7 @@ def create_thumbnail(xmlmap, filepath):
     m = mapnik.Map(*shape)
     mapnik.load_map_from_string(m, xmlmap)
     box = m.layers[0].envelope()
+    prj = mapnik.Projection(m.srs)
     prj_box = box.forward(prj)
     m.zoom_to_box(prj_box)
     im = mapnik.Image(*shape)

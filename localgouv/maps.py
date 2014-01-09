@@ -12,7 +12,7 @@ POP_VAR = cast(AdminZoneFinance.data['population'], Float)
 
 MAPS_CONFIG = {
     'debt_per_person': {
-        'description': u'Dette par commune par habitant en €',
+        'description': u'Charges financières annuelles par commune par habitant (€)',
         'sql_variable': cast(AdminZoneFinance.data['debt_annual_costs'], Float)/POP_VAR,
         'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['debt_annual_costs'] <> 'nan'),
     }
@@ -53,7 +53,7 @@ def get_extent():
         func.min(func.ST_XMin(AdminZone.geometry)),
         func.min(func.ST_YMin(AdminZone.geometry)),
         func.max(func.ST_XMax(AdminZone.geometry)),
-        func.max(func.ST_XMax(AdminZone.geometry)),
+        func.max(func.ST_YMax(AdminZone.geometry)),
     ).first()
 
 def france_layer(layer_id, query):

@@ -52,11 +52,12 @@ class GoogleProjection:
 
 
 class RenderThread:
-    def __init__(self, tile_dir, xmlmap, q, printLock, maxZoom, layer_id=None, fields=None):
+    def __init__(self, tile_dir, xmlmap, q, printLock, maxZoom, fields=None, layer_id=None):
         self.tile_dir = tile_dir
         self.q = q
-        self.m = mapnik.Map(256, 256)
-        self.g = mapnik.Grid(256, 256)
+        self.render_size = 256
+        self.m = mapnik.Map(self.render_size, self.render_size)
+        self.g = mapnik.Grid(self.render_size, self.render_size)
         self.printLock = printLock
         # Load style XML
         mapnik.load_map_from_string(self.m, xmlmap)
@@ -68,11 +69,10 @@ class RenderThread:
         self.layer_id = layer_id
         self.fields = fields
 
-    def render_tile(self, tile_uri, x, y, z):
-
+    def get_bbox(self, x, y, z):
         # Calculate pixel positions of bottom-left & top-right
-        p0 = (x * 256, (y + 1) * 256)
-        p1 = ((x + 1) * 256, y * 256)
+        p0 = (x * self.render_size, (y + 1) * self.render_size)
+        p1 = ((x + 1) * self.render_size, y * self.render_size)
 
         # Convert to LatLong (EPSG:4326)
         l0 = self.tileproj.fromPixelToLL(p0, z);
@@ -84,11 +84,13 @@ class RenderThread:
 
         # Bounding box for the tile
         if hasattr(mapnik,'mapnik_version') and mapnik.mapnik_version() >= 800:
-            bbox = mapnik.Box2d(c0.x,c0.y, c1.x,c1.y)
+            return mapnik.Box2d(c0.x,c0.y, c1.x,c1.y)
         else:
-            bbox = mapnik.Envelope(c0.x,c0.y, c1.x,c1.y)
-        render_size = 256
-        self.m.resize(render_size, render_size)
+            return mapnik.Envelope(c0.x,c0.y, c1.x,c1.y)
+
+    def render_tile(self, tile_uri, x, y, z):
+        bbox = self.get_bbox(x, y, z)
+        self.m.resize(self.render_size, self.render_size)
         self.m.zoom_to_box(bbox)
         self.m.buffer_size = 128
 
@@ -97,14 +99,16 @@ class RenderThread:
         mapnik.render(self.m, im)
         im.save(tile_uri, 'png256')
 
+    def render_grid(self, grid_uri, x, y, z):
+        bbox = self.get_bbox(x, y, z)
+        self.m.resize(self.render_size, self.render_size)
+        self.m.zoom_to_box(bbox)
+        self.m.buffer_size = 128
         # Render grid
-        """
-        mapnik.render_layer(self.m, self.g)#, layer=self.layer_id, fields=self.fields)
-        utf_grids = self.g.encode('utf', resolution=4)
+        utf_grids = mapnik.render_grid(self.m, self.layer_id, fields=self.fields)
         if not utf_grids['keys'] or utf_grids['keys'] == [""]:
             utf_grids = ''
-        json.dump(utf_grids, open(tile_uri.replace('.png', '.grid.json')))
-        """
+        json.dump(utf_grids, open(grid_uri))
 
     def loop(self):
         while True:
@@ -125,6 +129,9 @@ class RenderThread:
             empty= ''
             if bytes == 103:
                 empty = " Empty Tile "
+            grid_uri = tile_uri.replace('.png', '.grid.json')
+            if not os.path.isfile(grid_uri):
+                self.render_grid(grid_uri, x, y, z)
             self.printLock.acquire()
             print name, ":", z, x, y, exists, empty
             self.printLock.release()
@@ -132,7 +139,7 @@ class RenderThread:
 
 
 
-def render_tiles(bbox, xmlmap, tile_dir, minZoom=1,maxZoom=18, name="unknown", num_threads=NUM_THREADS, tms_scheme=False):
+def render_tiles(bbox, xmlmap, tile_dir, minZoom=1,maxZoom=18, name="unknown", num_threads=NUM_THREADS, tms_scheme=False, fields=None):
     print "render_tiles(",bbox, tile_dir, minZoom,maxZoom, name,")"
 
     # Launch rendering threads
@@ -140,7 +147,7 @@ def render_tiles(bbox, xmlmap, tile_dir, minZoom=1,maxZoom=18, name="unknown", n
     printLock = threading.Lock()
     renderers = {}
     for i in range(num_threads):
-        renderer = RenderThread(tile_dir, xmlmap, queue, printLock, maxZoom)
+        renderer = RenderThread(tile_dir, xmlmap, queue, printLock, maxZoom, fields or [])
         render_thread = threading.Thread(target=renderer.loop)
         render_thread.start()
         #print "Started render thread %s" % render_thread.getName()
