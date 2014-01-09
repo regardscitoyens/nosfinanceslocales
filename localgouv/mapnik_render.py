@@ -95,7 +95,7 @@ class RenderThread:
         self.m.buffer_size = 128
 
         # Render image with default Agg renderer
-        im = mapnik.Image(render_size, render_size)
+        im = mapnik.Image(self.render_size, self.render_size)
         mapnik.render(self.m, im)
         im.save(tile_uri, 'png256')
 
@@ -131,6 +131,7 @@ class RenderThread:
                 empty = " Empty Tile "
             grid_uri = tile_uri.replace('.png', '.grid.json')
             if not os.path.isfile(grid_uri):
+                print "grid", name, ":", z, x, y, exists, empty
                 self.render_grid(grid_uri, x, y, z)
             self.printLock.acquire()
             print name, ":", z, x, y, exists, empty

@@ -72,7 +72,7 @@ def main(argv=sys.argv):
                 os.makedirs(map_tile_dir)
             except OSError:
                 pass
-            render_tiles(extent, xmlmap, map_tile_dir, m.info['minzoom'], m.info['maxzoom'], name=m.info['name'], fields=[var_name, 'name', 'insee_code'], layer_id=0)
+            render_tiles(extent, xmlmap, map_tile_dir, m.info['minzoom'], m.info['maxzoom'], name=m.info['name'], fields=[var_name, 'name', 'code_insee'], layer_id=0)
 
             # XXX: move this elsewhere...
             # create thumbnail of the map

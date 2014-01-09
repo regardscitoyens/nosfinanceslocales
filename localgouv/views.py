@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import os
+import json
 from pyramid.view import view_config
 from pyramid.response import FileResponse
 from cornice import Service
 from cornice.resource import resource, view
-from .models import AdminZoneFinance, DBSession, AdminZone
+from .models import AdminZoneFinance, DBSession, AdminZone, Stats as StatsModel
 from .maps import map_registry, MAPS_CONFIG
 
 city_search = Service(name='search_city', path='/search_city', description="city search")
@@ -34,6 +35,17 @@ class AZFinance(object):
         res = DBSession.query(AdminZone.name, AdminZone.code_insee, AdminZone.code_dep, AdminZoneFinance.year, AdminZoneFinance.data).join(AdminZone, AdminZone.id==AdminZoneFinance.adminzone_id).filter(AdminZone.id==id).order_by('year').all()
         return {'results': res}
 
+@resource(collection_path='/stats', path='/stat/{id}')
+class Stats(object):
+    def __init__(self, request):
+        self.request = request
+    def get(self):
+        id = self.request.matchdict['id']
+        stat = DBSession.query(StatsModel).filter(StatsModel.name==id).first()
+        return {'results': {'mean_by_year': json.loads(stat.data['mean_by_year']), 'var_name': id}}
+    def collection_get(self):
+        stats = DBSession.query(StatsModel).all()
+        return {'results': [{'mean_by_year': json.loads(stat.data['mean_by_year']), 'var_name': stat.name} for stat in stats]}
 
 # view for development purpose
 from pyramid.response import FileResponse

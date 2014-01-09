@@ -1,30 +1,56 @@
 # -*- coding: utf-8 -*-
 
 import re
+import json
 import os
 import numpy as np
 import brewer2mpl
 from sqlalchemy import func, cast, Float, select, alias, and_
+from sqlalchemy.sql import compiler
+from psycopg2.extensions import adapt as sqlescape
 
-from .models import DBSession, AdminZone, AdminZoneFinance, SRID
+
+from .models import DBSession, AdminZone, AdminZoneFinance, Stats, SRID
 
 POP_VAR = cast(AdminZoneFinance.data['population'], Float)
 
 MAPS_CONFIG = {
     'debt_per_person': {
-        'description': u'Charges financières annuelles par commune par habitant (€)',
-        'sql_variable': cast(AdminZoneFinance.data['debt_annual_costs'], Float)/POP_VAR,
+        'description': u'Charges financières annuelles par commune par habitant (en €)',
+        'sql_variable': cast(AdminZoneFinance.data['debt_annual_costs'], Float) / POP_VAR,
         'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['debt_annual_costs'] <> 'nan'),
+        'colors': lambda size: brewer2mpl.get_map('YlGnBu', 'Sequential', size)
+    },
+    'property_tax_rate': {
+        'description': u'Taxe foncière par commune (en %)',
+        'sql_variable': cast(AdminZoneFinance.data['property_tax_rate'], Float),
+        'sql_filter': AdminZoneFinance.data['property_tax_rate'] <> 'nan',
+        'colors': lambda size: brewer2mpl.get_map('YlOrRd', 'Sequential', size)
+    },
+    'home_tax_rate': {
+        'description': u'Taxe d\'habitation par commune (en %)',
+        'sql_variable': cast(AdminZoneFinance.data['home_tax_rate'], Float),
+        'sql_filter': AdminZoneFinance.data['home_tax_rate'] <> 'nan',
+        'colors': lambda size: brewer2mpl.get_map('PuRd', 'Sequential', size)
+    },
+    'property_tax_value_per_person': {
+        'description': u'Taxe foncière par commune par habitant (en €)',
+        'sql_variable': cast(AdminZoneFinance.data['property_tax_value'], Float) / POP_VAR,
+        'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['property_tax_value'] <> 'nan'),
+        'colors': lambda size: brewer2mpl.get_map('OrRd', 'Sequential', size)
+    },
+    'home_tax_value_per_person': {
+        'description': u'Taxe d\'habitation par commune par habitant (en €)',
+        'sql_variable': cast(AdminZoneFinance.data['home_tax_value'], Float) / POP_VAR,
+        'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['home_tax_value'] <> 'nan'),
+        'colors': lambda size: brewer2mpl.get_map('BuPu', 'Sequential', size)
     }
 }
 
 
-from sqlalchemy.sql import compiler
-
-from psycopg2.extensions import adapt as sqlescape
-# or use the appropiate escape function from your db driver
 
 def compile_query(query):
+    """Hack function to get sql query with params"""
     dialect = query.session.bind.dialect
     statement = query.statement
     comp = compiler.SQLCompiler(dialect, statement)
@@ -95,7 +121,6 @@ def scale_mss(layer, var_name, x, colors):
 
 class Map(object):
     # XXX: hack to store expensive scale query. Remove that crap later.
-    _scale_cache = {}
     def __init__(self, year, name):
         variables = MAPS_CONFIG.get(name)
         query = map_query(year, variables['sql_variable'].label(name), variables['sql_filter'])
@@ -104,13 +129,11 @@ class Map(object):
         # style
         # build scale based on quantiles
         size = 9
-        if name not in self._scale_cache:
-            self._scale_cache[name] = \
-                quantile_scale(variables['sql_variable'],
-                               variables['sql_filter'],
-                               size)
-        scale_range = self._scale_cache.get(name)
-        colors = brewer2mpl.get_map('YlGnBu', 'Sequential', size).hex_colors
+        stats = DBSession.query(Stats).filter(Stats.name==name).first()
+        scale_range = json.loads(stats.data['scale'])
+        assert size + 1 == len(scale_range)
+
+        colors = variables['colors'](size).hex_colors
 
         self.info = {
             'description': variables['description'],

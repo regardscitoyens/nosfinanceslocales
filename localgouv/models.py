@@ -79,3 +79,9 @@ class AdminZoneFinance(Base):
     adminzone_id   = Column(Integer, ForeignKey('adminzone.id'))
     year = Column(Integer)
     data = Column(MutableDict.as_mutable(HSTORE))
+
+class Stats(Base):
+    __tablename__ = 'stats'
+    id = Column(Integer, primary_key=True)
+    name = Column(Unicode(100))
+    data = Column(MutableDict.as_mutable(HSTORE))
