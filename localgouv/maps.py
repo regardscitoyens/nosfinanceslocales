@@ -47,7 +47,28 @@ MAPS_CONFIG = {
     }
 }
 
-
+BORDERS_MSS = """
+line-color: #eee;
+  line-join: round;
+  line-cap: round;
+  polygon-gamma: 0.1;
+  line-width: 0;
+  [zoom>6][zoom<9] {
+    line-width: 0.1;
+  }
+  [zoom=9] {
+    line-width: 0.3;
+  }
+  [zoom=10] {
+    line-width: 0.9;
+  }
+  [zoom=11] {
+    line-width: 1.5;
+  }
+  [zoom>11] {
+    line-width: 2.0;
+  }
+"""
 
 def compile_query(query):
     """Hack function to get sql query with params"""
@@ -141,20 +162,23 @@ class Map(object):
             'name': name,
             'id': "%s_%s"%(name, year),
             'minzoom': 5,
-            'maxzoom': 11,
+            'maxzoom': 7,
             'scale_colors': colors,
             'scale_range': scale_range,
-            'extent': get_extent(),
+            'extent': list(get_extent()), # XXX: cornice bug: if tuple, return {}
         }
 
         self.mapnik_config = {
             'srs': "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0.0 +k=1.0 +units=m +nadgrids=@null +wktext +no_defs +over",
             'Layer': [france_layer(layer, query)],
-            'Stylesheet': [{'id': 'scale.mss', 'data': scale_mss(layer, name, scale_range, colors)}],
+            'Stylesheet': [
+                {'id': 'scale.mss', 'data': scale_mss(layer, name, scale_range, colors)},
+                {'id': 'borders.mss', 'data': BORDERS_MSS},
+            ],
         }
 
 class MapRegistry(dict):
     def __missing__(self, key):
-        self[key] = [Map(year, key) for year in range(2000, 2012)]
+        self[key] = [Map(year, key) for year in range(2000, 2013)]
         return self[key]
 map_registry = MapRegistry()

@@ -23,6 +23,7 @@ from ..models import (
     Base,
     ADMIN_LEVEL_CITY,
     ADMIN_LEVEL_CITY_ARR,
+    SRID,
     )
 
 
@@ -44,7 +45,7 @@ def extract_adminzone_data(city):
             'code_department': properties['CODE_DEPT'],
             'code_city': properties['CODE_COMM'],
             'admin_level': admin_level,
-            'geometry': "SRID=4326;" + g.wkt}
+            'geometry': "SRID=%s;"%SRID + g.wkt}
 
 def main(argv=sys.argv):
     if len(argv) < 2:
@@ -85,7 +86,7 @@ def main(argv=sys.argv):
             if city_geom.type == 'Polygon':
                 city_geom = MultiPolygon([city_geom])
             az = AdminZone(**city)
-            az.geometry = city_geom.wkt
+            az.geometry = "SRID=%s;"%SRID + city_geom.wkt
             az.admin_level = ADMIN_LEVEL_CITY
             DBSession.add(az)
 

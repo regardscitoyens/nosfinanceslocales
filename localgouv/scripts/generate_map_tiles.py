@@ -40,7 +40,7 @@ def usage(argv):
     sys.exit(1)
 
 def create_thumbnail(xmlmap, filepath):
-    shape = (225, 140)
+    shape = (230, 200)
     m = mapnik.Map(*shape)
     mapnik.load_map_from_string(m, xmlmap)
     box = m.layers[0].envelope()

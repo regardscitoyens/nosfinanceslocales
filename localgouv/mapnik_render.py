@@ -108,7 +108,7 @@ class RenderThread:
         utf_grids = mapnik.render_grid(self.m, self.layer_id, fields=self.fields)
         if not utf_grids['keys'] or utf_grids['keys'] == [""]:
             utf_grids = ''
-        json.dump(utf_grids, open(grid_uri))
+        json.dump(utf_grids, open(grid_uri, 'w'), encoding='utf-8')
 
     def loop(self):
         while True:
