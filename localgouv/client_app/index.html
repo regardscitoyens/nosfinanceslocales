@@ -12,7 +12,9 @@
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.1/leaflet.css" />
+    <link rel="stylesheet" href="/static/css/angular-slider.css" />
     <script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script src="http://mbostock.github.com/d3/d3.v2.js"></script>
     <script src="http://cdn.leafletjs.com/leaflet-0.7.1/leaflet.js"></script>
     <script src="/static/js/leaflet.utfgrid.js"></script>
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
@@ -20,7 +22,69 @@
     <script src="/static/js/ui-bootstrap-tpls-0.9.0.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.0/angular-ui-router.min.js"></script>
     <script src="/static/js/app.js"></script>
+    <style type='text/css'>
+      [ui-sref]{
+        cursor: pointer;
+      }
+      .legend .legend-title {
+        text-align: left;
+        margin-bottom: 8px;
+        font-weight: bold;
+        font-size: 90%;
+      }
+      .legend .legend-scale ul {
+        margin: 0;
+        padding: 0;
+        float: left;
+        list-style: none;
+      }
+      .legend .legend-scale ul li {
+        display: block;
+        float: left;
+        width: 72px;
+        margin-bottom: 6px;
+        text-align: center;
+        font-size: 80%;
+        list-style: none;
+      }
+      .legend ul.legend-labels li span {
+        display: block;
+        float: left;
+        height: 25px;
+        width: 72px;
+      }
+      .legend .legend-source {
+        font-size: 70%;
+        color: #999;
+        clear: both;
+      }
+      .legend a {
+        color: #777;
+      }
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+      }
 
+      .line {
+        fill: none;
+        stroke: steelblue;
+        stroke-width: 1.5px;
+      }
+      .linecircle {
+        fill: none;
+        stroke: steelblue;
+        stroke-width: 1.5px;
+      }
+      .mycarousel .carousel-indicators li {
+        display: none;
+      }
+      .mycarousel .right.carousel-control, .mycarousel .left.carousel-control {
+        background-image: none;
+      }
+    </style>
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>

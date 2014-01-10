@@ -1,6 +1,48 @@
 <div class="row">
-  <div leaflet-map class="col-md-8" style="height:400px" map-data="mapData" on-click="onClick" on-mouse-over="onMouseOver" on-mouse-out="onMouseOut"></div>
+  <h3>
+    {{mapData.description}}
+  </h3>
+  <div class="col-md-8">
+    <div class="row">
+      <h4>Année : <span class="label label-danger">{{year}}</span></h4>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-7">
+    <div class="row">
+      <input type="range" ng-model="year" value="2000" min="2000" max="2012" step="1" style="width:95%">
+      <div leaflet-map style="width:95%;height:650px" map-data="mapData" on-click="onClick" on-mouse-over="onMouseOver" on-mouse-out="onMouseOut"></div>
+    </div>
+    <div class="row">
+      <div class='legend'>
+        <div class='legend-scale'>
+          <ul class='legend-labels'>
+            <li ng-repeat="color in mapData.scale_colors">
+            <span style='background:{{color}};'></span>
+            {{mapData.scale_range[$index]|number:2}}
+            </li>
+          </ul>
+        </div>
+        <div class='legend-source'>
+          Source: <a href="http://www.collectivites-locales.gouv.fr/">@Bercy</a>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="col-md-4">
-    <h3> </h3>
+    <div class="row">
+      <h4><span class="label label-primary"><span class="glyphicon glyphicon-eye-open"></span> Info commune survolée</span></h4>
+      <ul class="list-group">
+        <li class="list-group-item">Commune: <b>{{mouseOverdata.name}} ({{mouseOverdata.code_insee}})</b></li>
+        <li class="list-group-item">Année: <b>{{mapData.year}}</b></li>
+        <li class="list-group-item">{{mapData.description}}: <b>{{mouseOverdata[timemap.var_name]|number:2}}</b></li>
+      </ul>
+    </div>
+    <div class="row">
+      <h4><span class="label label-primary"><span class="glyphicon glyphicon-stats"></span> Statistiques</span> </h4>
+     <div line-chart data="stat.mean_by_year"></div>
+    </div>
+
   </div>
 </div>

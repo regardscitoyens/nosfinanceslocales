@@ -1,10 +1,23 @@
 <div class="row">
-  <div class="col-md-3" ng-repeat="map in maps">
+  <div class="col-md-3" ng-repeat="timemap in timemaps">
     <div class="thumbnail">
-      <img src="{{map.maps[0].thumbnail}}" alt="map" class="img-rounded" style="width: 200px; height: 200px;">
+      <!--img ng-src="{{mapUtils.getThumbnailUrl(timemap.maps[0].id)}}" alt="map" class="img-rounded" style="width: 230px; height: 200px;" ui-sref="maps.detail({var_name:timemap.var_name})"-->
+      <carousel interval="3000" class="mycarousel">
+        <slide ng-repeat="map in timemap.maps" active="map.active" class="myslide">
+        <img ng-src="{{mapUtils.getThumbnailUrl(map.id)}}" alt="map" class="img-rounded" style="width: 230px; height: 200px;" ui-sref="maps.detail({var_name:timemap.var_name})">
+          <div class="carousel-caption">
+            <h4>{{map.year}}</h4>
+          </div>
+        </slide>
+      </carousel>
       <div class="caption">
-        <h4><a ui-sref="maps.detail({id:map.var_name})">{{map.maps[0].description}}</a></h3>
-        <p> Info: quantiles, médians
+        <h4><a ui-sref="maps.detail({var_name:timemap.var_name})">{{timemap.maps[0].description|limitTo:45}}</a></h3>
+        <p>
+          Médiane: {{timemap.maps[0].scale_range[5]|number:2}}
+        </p>
+        <p>
+          Min-Max: {{timemap.maps[0].scale_range[0]|number:2}} - {{timemap.maps[0].scale_range[9]|number:2}}
+        </p>
       </div>
     </div>
   </div>
