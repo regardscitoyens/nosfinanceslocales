@@ -23,7 +23,6 @@ def usage(argv):
           '(example: "%s development.ini")' % (cmd, cmd))
     sys.exit(1)
 
-
 def main(argv=sys.argv):
     if len(argv) < 2:
         usage(argv)
