@@ -39,18 +39,9 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
     .config(
         [ '$stateProvider', '$urlRouterProvider',
         function ($stateProvider, $urlRouterProvider) {
-            $urlRouterProvider.when('', 'maps');
-            $urlRouterProvider.otherwise('maps');
+            $urlRouterProvider.when('', '/maps/');
+            $urlRouterProvider.otherwise('/maps/');
             $stateProvider
-                .state('home', {
-                    url: '/',
-                    templateUrl: 'templates/home.html',
-                    resolve: {
-                        stats: function(Resource) {
-                            return Resource('stat').all();
-                        }
-                    }
-                })
                 .state('about', {
                     url: '/about',
                     templateUrl: 'templates/about.html',
@@ -116,8 +107,8 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
             };
             fireDigestEverySecond();
         }])
-    .controller('MapDetailCtrl', ['$scope', '$stateParams', '$http', 'mapUtils',
-        function($scope, $stateParams, $http, mapUtils) {
+    .controller('MapDetailCtrl', ['$scope', '$stateParams', 'Resource', 'mapUtils',
+        function($scope, $stateParams, Resource, mapUtils) {
             // get the timemap for this variable
             $scope.timemap = $scope.timemaps.filter(function(timemap) {
                 return (timemap.var_name == $stateParams.var_name)
@@ -139,6 +130,9 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 $scope.mapData = findMapData(newVal);
             });
             $scope.onClick = function(data) {
+                Resource('finance').get(data.id).then(function(results) {
+                    $scope.cityFinance = results;
+                });
                 $scope.$apply();
             }
             $scope.onMouseOver = function(data) {
