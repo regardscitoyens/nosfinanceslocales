@@ -1,6 +1,6 @@
 angular.module('app', ['ui.router', 'ui.bootstrap'])
     .constant('CLOUDMADE_API_KEY', '96d88d05d11e4ce4b841290fa31277fb')
-    .constant('API_ROOT_URL', '/api')
+    .constant('API_ROOT_URL', 'http://www.localfinance.fr/api')
     .constant('TILES_ROOT_URL', 'http://www.localfinance.fr/tiles') // get this info from server ?
     .constant('THUMBNAILS_URL', 'http://www.localfinance.fr/static/thumbnails')
     .factory('mapUtils', function(TILES_ROOT_URL, THUMBNAILS_URL) {
@@ -126,9 +126,6 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 })[0];
             }
             $scope.mapData = findMapData($scope.timemap.maps[0].year);
-            $scope.$watch('year', function(newVal, oldVal) {
-                $scope.mapData = findMapData(newVal);
-            });
             $scope.onClick = function(data) {
                 Resource('finance').get(data.id).then(function(results) {
                     $scope.cityFinance = results;
@@ -145,8 +142,9 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
             restrict: "A",
             replace: false,
             scope: {
-                mapData: '=',
-                opacity: '=',
+                timemap: '=',
+                year: '=',
+                opacityFactor: '=',
                 click: '&onClick',
                 mouseOver: '&onMouseOver',
                 mouseOut: '&onMouseOut'
@@ -155,57 +153,71 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 var onClick = $scope.click(),
                     onMouseOver = $scope.mouseOver(),
                     onMouseOut = $scope.mouseOut();
+                var refmap = $scope.timemap.maps[0];
 
-                $scope.$watch('mapData', function(newVal, oldVal) {
-                    return $scope.render(newVal);
-                }, true);
-
-                var southWest = L.latLng($scope.mapData.extent[1],
-                                         $scope.mapData.extent[0]),
-                    northEast = L.latLng($scope.mapData.extent[3],
-                                         $scope.mapData.extent[2]),
+                var southWest = L.latLng(refmap.extent[1],
+                                         refmap.extent[0]),
+                    northEast = L.latLng(refmap.extent[3],
+                                         refmap.extent[2]),
                     bounds = L.latLngBounds(southWest, northEast);
 
                 var basemap = new L.TileLayer("http://{s}.tile.stamen.com/toner" +
-                        "/{z}/{x}/{y}.png")
-                    mylyr = new L.TileLayer(mapUtils.getTileUrl($scope.mapData.id),
-                        {opacity: $scope.opacity, maxBounds: bounds}),
-                    utfGrid = new L.UtfGrid(mapUtils.getGridUrl($scope.mapData.id),
-                                            {useJsonP: false});
+                        "/{z}/{x}/{y}.png"), utfGrid;
+                var layers = [basemap];
+                var years_to_layers = {}, years_to_maps = {}, years = [];
+                for(var imap=0;imap<$scope.timemap.maps.length;imap++) {
+                    var map = $scope.timemap.maps[imap];
+                    var layer = new L.TileLayer(mapUtils.getTileUrl(map.id),{opacity: 0})
+                    layers.push(layer);
+                    years_to_layers[map.year] = layer;
+                    years_to_maps[map.year] = map;
+                    years.push(map.year);
+                }
 
-                var interactiveLayerGroup = L.layerGroup(
-                    [basemap, mylyr, utfGrid]
-                );
-
-                //Events
-                utfGrid.on('click', function (e) {
-                    if (e.data) {
-                        onClick(e.data);
-                    }
-                });
-                utfGrid.on('mouseover', function (e) {
-                    if (e.data) {
-                        onMouseOver(e.data);
-                    }
-                });
-                utfGrid.on('mouseout', function (e) {
-                });
+                var interactiveLayerGroup = L.layerGroup(layers);
 
                 var options = {
                     center: L.latLng(46.22587886848165, 2.21040301636657),
                     zoom: 6,
-                    minZoom: $scope.mapData.minzoom,
-                    maxZoom: $scope.mapData.maxzoom
+                    minZoom: refmap.minzoom, // should take the max of min
+                    maxZoom: refmap.maxzoom // should take the min of max
                 };
-                map = L.map(element[0], options)
+
+                // leaflet map
+                var lmap = L.map(element[0], options)
                     .addLayer(interactiveLayerGroup);
 
-                $scope.render = function(mapData) {
-                    mylyr.setUrl(mapUtils.getTileUrl(mapData.id));
-                    map.removeLayer(utfGrid);
-                    utfGrid = new L.UtfGrid(mapUtils.getGridUrl($scope.mapData.id),
+                $scope.$watch('year', function(newVal, oldVal) {
+                    return $scope.render(newVal);
+                }, true);
+
+                $scope.render = function(year) {
+                    if (!year) {
+                        return;
+                    }
+                    var year_low = Math.floor(year), utfGridMap;
+                    for (var iyear=0;iyear<years.length;iyear++) {
+                        var current_year = years[iyear];
+                        if (current_year == year_low) {
+                            years_to_layers[year_low].setOpacity(Math.max(1, 1-(year-year_low) + 0.5));
+                        } else if (current_year == year_low+1) {
+                            years_to_layers[year_low+1].setOpacity(-(year_low-year));
+                        } else {
+                            years_to_layers[current_year].setOpacity(0);
+                        }
+                    }
+                    if (utfGrid) {
+                        lmap.removeLayer(utfGrid);
+                    }
+                    if ((year-year_low) < 0.5) {
+                        utfGridMap = years_to_maps[year_low];
+                    } else {
+                        utfGridMap = years_to_maps[year_low + 1];
+                    }
+                    utfGrid = new L.UtfGrid(mapUtils.getGridUrl(utfGridMap.id),
                                             {useJsonP: false});
-                    map.addLayer(utfGrid);
+                    lmap.addLayer(utfGrid);
+
                     //Events
                     utfGrid.on('click', function (e) {
                         if (e.data) {
@@ -220,7 +232,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                     utfGrid.on('mouseout', function (e) {
                     });
 
-                    }
+                }
             }
         }})
     .directive('lineChart', function () {
