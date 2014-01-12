@@ -164,13 +164,13 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 var basemap = new L.TileLayer("http://{s}.tile.stamen.com/toner" +
                         "/{z}/{x}/{y}.png"), utfGrid;
                 var layers = [basemap];
-                var years_to_layers = {}, years_to_maps = {}, years = [];
+                var yearsToLayers = {}, yearsToUtfGrids = {}, utfGrid, years = [];
                 for(var imap=0;imap<$scope.timemap.maps.length;imap++) {
                     var map = $scope.timemap.maps[imap];
                     var layer = new L.TileLayer(mapUtils.getTileUrl(map.id),{opacity: 0})
                     layers.push(layer);
-                    years_to_layers[map.year] = layer;
-                    years_to_maps[map.year] = map;
+                    yearsToLayers[map.year] = layer;
+                    yearsToUtfGrids[map.year] = new L.UtfGrid(mapUtils.getGridUrl(map.id), {useJsonP: false});
                     years.push(map.year);
                 }
 
@@ -195,28 +195,21 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                     if (!year) {
                         return;
                     }
-                    var year_low = Math.floor(year), utfGridMap;
+                    var yearLow = Math.floor(year), newUtfGrid = yearsToUtfGrids[yearLow];
                     for (var iyear=0;iyear<years.length;iyear++) {
-                        var current_year = years[iyear];
-                        if (current_year == year_low) {
-                            years_to_layers[year_low].setOpacity(Math.max(1, 1-(year-year_low) + 0.5));
-                        } else if (current_year == year_low+1) {
-                            years_to_layers[year_low+1].setOpacity(-(year_low-year));
+                        if (years[iyear] == yearLow) {
+                            yearsToLayers[yearLow].setOpacity(Math.max(1, 1-(year-yearLow) + 0.5));
+                        } else if (years[iyear] == yearLow+1) {
+                            yearsToLayers[yearLow+1].setOpacity(-(yearLow-year));
                         } else {
-                            years_to_layers[current_year].setOpacity(0);
+                            yearsToLayers[years[iyear]].setOpacity(0);
                         }
                     }
                     if (utfGrid) {
                         lmap.removeLayer(utfGrid);
                     }
-                    if ((year-year_low) < 0.5) {
-                        utfGridMap = years_to_maps[year_low];
-                    } else {
-                        utfGridMap = years_to_maps[year_low + 1];
-                    }
-                    utfGrid = new L.UtfGrid(mapUtils.getGridUrl(utfGridMap.id),
-                                            {useJsonP: false});
-                    lmap.addLayer(utfGrid);
+                    lmap.addLayer(newUtfGrid);
+                    utfGrid = newUtfGrid;
 
                     //Events
                     utfGrid.on('click', function (e) {
