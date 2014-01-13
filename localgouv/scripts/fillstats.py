@@ -63,12 +63,6 @@ def main(argv=sys.argv):
         with transaction.manager:
             DBSession.add(Stats(name=var_name, data=data))
 
-    # fill AdminZoneFinance with new variable set in MAPS_CONFIG
-    for var_name, config in MAPS_CONFIG.items():
-        azf = DBSession.query(AdminZoneFinance, config['sql_variable'])\
-                .filter(config['sql_filter']).all()
-
-
 if __name__ == '__main__':
     main()
 
