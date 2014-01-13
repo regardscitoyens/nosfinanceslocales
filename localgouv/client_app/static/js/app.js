@@ -1,7 +1,6 @@
 angular.module('app', ['ui.router', 'ui.bootstrap'])
-    .constant('CLOUDMADE_API_KEY', '96d88d05d11e4ce4b841290fa31277fb')
     .constant('API_ROOT_URL', 'http://www.localfinance.fr/api')
-    .constant('TILES_ROOT_URL', 'http://www.localfinance.fr/tiles') // get this info from server ?
+    .constant('TILES_ROOT_URL', 'http://{s}.tile.localfinance.fr/tiles') // get this info from server ?
     .constant('THUMBNAILS_URL', 'http://www.localfinance.fr/static/thumbnails')
     .factory('mapUtils', function(TILES_ROOT_URL, THUMBNAILS_URL) {
         return {
@@ -109,14 +108,33 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
         }])
     .controller('MapDetailCtrl', ['$scope', '$stateParams', 'Resource', 'mapUtils',
         function($scope, $stateParams, Resource, mapUtils) {
+            var colors = d3.scale.category10();;
             // get the timemap for this variable
             $scope.timemap = $scope.timemaps.filter(function(timemap) {
                 return (timemap.var_name == $stateParams.var_name)
             })[0];
             // same for stats
-            $scope.stat = $scope.stats.filter(function(stat) {
-                return (stat.var_name == $stateParams.var_name)
-            })[0];
+            $scope.linesData = [
+                {
+                    name: 'FRANCE',
+                    data: $scope.stats.filter(function(stat){
+                        return (stat.var_name == $stateParams.var_name)
+                    })[0].mean_by_year,
+                    color: colors('FRANCE')
+                }
+            ];
+            $scope.removeLine = function(id) {
+                // make impossible to remove france
+                if (id) {
+                    var idxToRemove;
+                    $scope.linesData.forEach(function(d, i) {
+                        if (d.id==id){
+                            idxToRemove = i;
+                        }
+                    });
+                    $scope.linesData.splice(idxToRemove, idxToRemove+1);
+                }
+            }
             // take first map
             $scope.year = $scope.timemap.maps[0].year;
             $scope.opacity = 0.85;
@@ -127,8 +145,20 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
             }
             $scope.mapData = findMapData($scope.timemap.maps[0].year);
             $scope.onClick = function(data) {
+                function checkLine(id) {
+                    return ($scope.linesData.filter(function(d){return (data.id==d.id)}).length > 0)
+                }
+                if  (checkLine(data.id)) {
+                    return ;
+                }
                 Resource('finance').get(data.id).then(function(results) {
-                    $scope.cityFinance = results;
+                    // get var_name stat
+                    var res = results.map(function(d){
+                        return [d.year, parseFloat(d.data[$scope.timemap.var_name])];
+                    })
+                    if (!checkLine(data.id)) {
+                        $scope.linesData.push({name: results[0].name, data: res, color: colors(results[0].name), id: data.id});
+                    }
                 });
                 $scope.$apply();
             }
@@ -136,8 +166,9 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 $scope.mouseOverdata = data;
                 $scope.$apply();
             }
+            document.data = $scope.linesData;
         }])
-    .directive('leafletMap', function (mapUtils, CLOUDMADE_API_KEY) {
+    .directive('leafletMap', function (mapUtils) {
         return {
             restrict: "A",
             replace: false,
@@ -167,7 +198,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 var yearsToLayers = {}, yearsToUtfGrids = {}, utfGrid, years = [];
                 for(var imap=0;imap<$scope.timemap.maps.length;imap++) {
                     var map = $scope.timemap.maps[imap];
-                    var layer = new L.TileLayer(mapUtils.getTileUrl(map.id),{opacity: 0})
+                    var layer = new L.TileLayer(mapUtils.getTileUrl(map.id),{opacity: 0, subdomains: 'abc'})
                     layers.push(layer);
                     yearsToLayers[map.year] = layer;
                     yearsToUtfGrids[map.year] = new L.UtfGrid(mapUtils.getGridUrl(map.id), {useJsonP: false});
@@ -180,7 +211,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                     center: L.latLng(46.22587886848165, 2.21040301636657),
                     zoom: 6,
                     minZoom: refmap.minzoom, // should take the max of min
-                    maxZoom: refmap.maxzoom // should take the min of max
+                    maxZoom: refmap.maxzoom, // should take the min of max
                 };
 
                 // leaflet map
@@ -234,33 +265,49 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
             replace: false,
             scope: {
                 data: '=',
+                name: '='
             },
             link: function($scope, element, attrs, controller) {
-                var tooltip = d3.select(element[0])
+                // data = [{name: '', data: ''},]
+                var tooltip = d3.select(document.createElement('div'))
                     .append("div")
-                    .attr("class", "tooltip")
-                    .style("opacity", 1);
+                    .attr("class", "mytooltip popover")
+                    .style("opacity", 0)
+                    .style("display", 'none');
+                document.body.appendChild(tooltip.node());
+
                 var margin = {top: 20, right: 20, bottom: 30, left: 50},
                     width = 400 - margin.left - margin.right,
                     height = 250 - margin.top - margin.bottom;
                 var parseDate = d3.time.format("%Y").parse;
+                var svg;
+
                 $scope.render = function(data) {
-                    var x = d3.time.scale()
-                        .range([0, width])
-                        .domain(d3.extent(data, function(d){return parseDate(d[0].toString())}));
-                    var y = d3.scale.linear()
-                        .range([height, 0])
-                        .domain(d3.extent(data, function(d){return d[1]}));
-                    //Create SVG element
-                    var line = d3.svg.line()
-                        .x(function(d){return x(parseDate(d[0].toString()))})
-                        .y(function(d){return y(d[1])});
+                    if (!data) {
+                        return;
+                    }
+                    d3.select(element[0]).selectAll('svg').remove();
+
                     var svg = d3.select(element[0])
                         .append("svg")
                         .attr("width", width + margin.left + margin.right)
                         .attr("height", height + margin.top + margin.bottom)
                         .append("g")
                         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+                    // take the first series to set x
+                    var x = d3.time.scale()
+                        .range([0, width])
+                        .domain(d3.extent(data[0].data, function(d){return parseDate(d[0].toString())}));
+                    var y = d3.scale.linear()
+                        .range([height, 0])
+                        .domain([
+                            d3.min(data, function(line) {return d3.min(line.data, function(d){return d[1]})}) * 0.95,
+                            d3.max(data, function(line) {return d3.max(line.data, function(d){return d[1]})}) * 1.05
+                            ]);
+                    //Create SVG element
+                    var line = d3.svg.line()
+                        .x(function(d){return x(parseDate(d[0].toString()))})
+                        .y(function(d){return y(d[1])});
                     var xAxis = d3.svg.axis()
                         .scale(x)
                         .orient('bottom')
@@ -272,24 +319,52 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                     var yAxis = d3.svg.axis().scale(y).orient("left");
                     svg.append("g")
                         .attr('class', 'y axis')
-                        .call(yAxis);
-                    svg.append("path")
-                        .datum(data)
-                        .attr("class", "line")
-                        .attr("d", line);
-                    svg.selectAll('circle')
+                        .call(yAxis)
+                        .append("text")
+                        .attr("transform", "rotate(-90)")
+                        .attr("y", 6)
+                        .attr("dy", ".71em")
+                        .style("text-anchor", "end")
+                        .text($scope.name);
+                    var lines = svg.selectAll(".gline")
                         .data(data)
+                        .enter().append("g")
+                        .attr("class", "gline");
+                    lines.append("path")
+                        .attr("class", "line")
+                        .attr("d", function(d) { return line(d.data); })
+                        .style("stroke", function(d) { return d.color; });
+                    lines.selectAll("circle")
+                        .data(function(d, i) { return d.data.map(function(el){return [el[0], el[1], d.color]});})
                         .enter()
-                        .append('circle')
-                        .attr("r",5)
+                        .append("circle")
+                        .attr("stroke", function(d, i) {return d[2]})
+                        .attr("r", 4)
                         .attr("cx", function(d) { return x(parseDate(d[0].toString())); })
                         .attr("cy", function(d) { return y(d[1]); })
                         .attr("class", "linecircle")
+                        .on("mouseover", function(d) {
+                            var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft,
+                                scrollTop  = document.documentElement.scrollTop || document.body.scrollTop;
+                            tooltip.html("<div class='popover-content'> <b>" +
+                                d[0] + " : " + d3.format(".2f")(d[1]) +
+                                "</b></div>");
+                            tooltip.style("left", d3.event.x + scrollLeft + 10 + "px");
+                            tooltip.style("top", d3.event.y + scrollTop - 50 + "px");
+                            tooltip.style("display", 'block')
+                            tooltip.transition().duration(200).style("opacity", 0.9);
+                        })
+                        .on("mouseout", function(d) {
+                            tooltip.transition().duration(200).style("opacity", 0);
+                            tooltip.style("display", 'none')
+                        })
                         .style("pointer-events","all")
                         .append('title')
                         .text(function(d) { return d[0] + ' : ' + d[1];});
                 }
-                $scope.render($scope.data);
+                $scope.$watchCollection('data', function(newData, oldData) {
+                    $scope.render(newData);
+                });
             }
         }
     });

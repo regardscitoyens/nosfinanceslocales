@@ -25,6 +25,10 @@
       [ui-sref]{
         cursor: pointer;
       }
+      [ng-click]{
+        cursor: pointer;
+      }
+
       .legend .legend-title {
         text-align: left;
         margin-bottom: 8px;
@@ -69,19 +73,32 @@
 
       .line {
         fill: none;
-        stroke: steelblue;
         stroke-width: 1.5px;
       }
       .linecircle {
-        fill: none;
-        stroke: steelblue;
-        stroke-width: 1.5px;
+        fill: #fff;
+        stroke-width: 2px;
+      }
+      .linecircle:hover {
+        stroke-width: 4px;
       }
       .mycarousel .carousel-indicators li {
         display: none;
       }
       .mycarousel .right.carousel-control, .mycarousel .left.carousel-control {
         background-image: none;
+      }
+
+      .mytooltip {
+        display: block;
+        position: absolute;
+        z-index: 10;
+      }
+      .mytooltip .popover.title {
+        display: block;
+      }
+      .mytooltip .popover.content {
+        display: block;
       }
     </style>
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
