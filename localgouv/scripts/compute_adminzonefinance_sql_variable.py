@@ -49,16 +49,17 @@ def main(argv=sys.argv):
     results = DBSession.query(AdminZoneFinance.id, config['sql_variable'])\
             .filter(config['sql_filter']).order_by(AdminZoneFinance.id).all()
     nb = len(results)
-    nb_packets = 10
+    nb_packets = 100
     # commit values by packets
     for i in range(nb_packets+1):
+        print "packet : %i"%i
         istart = i*nb/nb_packets
         iend = min((i+1)*nb/nb_packets, nb)
         subresults = results[istart:iend]
         with transaction.manager:
-            ids = zip(*subresults)[1]
+            ids = zip(*subresults)[0]
             items = DBSession.query(AdminZoneFinance).filter(AdminZoneFinance.id.in_(ids)).order_by(AdminZoneFinance.id).all()
-            for item, val in zip(items, zip(*subresults)[0]):
+            for item, val in zip(items, zip(*subresults)[1]):
                 setattr(item.data, var_name, str(val))
 
 if __name__ == '__main__':
