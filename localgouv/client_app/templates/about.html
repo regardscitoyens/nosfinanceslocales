@@ -5,13 +5,17 @@
 <div class="row">
   <h3>Quelles données ?</h3>
   <ul>
-    <li>Données financières des communes : <a href="http://www.collectivites-locales.gouv.fr/">Bercy</a> et téléchargeables <a href="http://www.nosdonnees.fr">ici</a></li>
+    <li>Données financières des communes : extraites du site <a href="http://www.collectivites-locales.gouv.fr/">des collectivités locales</a> et disponible en format csv sur le site <a href="">NosDonnées.fr</a></li>
     <li>Données géographiques des communes : <a href="http://professionnels.ign.fr/geofla">IGN GEOFLA</a></li>
   </ul>
 </div>
 <div class="row">
   <h3> Quelle licence ? </h3>
-  ?
+  <div class="col-xs-6 col-md-2">
+    <a href="http://wiki.data.gouv.fr/wiki/Licence_Ouverte_/_Open_Licence" class="thumbnail">
+      <img ng-src="/static/Logo_Licence_Ouverte_noir_avec_texte.gif" alt="LO">
+    </a>
+  </div>
 </div>
 <div class="row">
   <h3>Comment ?</h3>
@@ -19,12 +23,15 @@
     <li>Cartographie : <a href="http://mapnik.org/">mapnik</a> et <a href="https://www.mapbox.com/tilemill/docs/manual/carto/">CartoCSS</a></li>
     <li>Serveur : <a href="http://www.pylonsproject.org/">Pyramid</a> and <a href="http://nginx.org/">nginx</a></li>
     <li>Client : <a href="http://angularjs.org/">AngularJS</a></li>
-    <li>Crawler des données financières : <a href="https://github.com/fmassot/localgouv_scraper">Scraper avec scrapy</a></li>
+    <li>Crawler des données financières : <a href="https://github.com/fmassot/localgouv_scraper">scraper implémenté avec scrapy</a></li>
   </ul>
 </div>
 <div class="row">
   <h3> Qui ?</h3>
-  <ul>
-    <li><a href="http://www.regardscitoyens.org">Regards Citoyens<a></li>
-  </ul>
+  <div class="col-xs-6 col-md-2">
+    <a href="http://www.regardscitoyens.org" class="thumbnail">
+      <img ng-src="/static/logo_regardscitoyens.svg" alt="regardscitoyens" style="height: 160px; width: 100%; display: block;">
+    </a>
+  </div>
 </div>
+
