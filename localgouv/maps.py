@@ -141,7 +141,6 @@ def scale_mss(layer, var_name, x, colors):
     return "#%s::variable{\n%s\n}"%(layer, '\n'.join(styles))
 
 class Map(object):
-    # XXX: hack to store expensive scale query. Remove that crap later.
     def __init__(self, year, name):
         variables = MAPS_CONFIG.get(name)
         query = map_query(year, variables['sql_variable'].label(name), variables['sql_filter'])

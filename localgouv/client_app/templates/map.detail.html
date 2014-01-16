@@ -41,7 +41,7 @@
     </div>
     <div class="row">
       <h4><span class="label label-default"><span class="glyphicon glyphicon-stats"></span> Statistiques</span> </h4>
-      <span class="label" style="background-color:{{lineData.color}};margin-right:5px" ng-repeat="lineData in linesData" ng-click="removeLine(lineData.id)">{{lineData.name}} </span>
+      <a class="btn btn-primary btn-xs" style="background-color:{{lineData.color}};margin-right:3px;margin-bottom:2px;border-color:{{lineData.color}}" ng-click="removeLine(lineData.id)" ng-repeat="lineData in linesData"><b>{{lineData.name}}</b></a>
       <div line-chart data="linesData" name="test"></div>
     </div>
 

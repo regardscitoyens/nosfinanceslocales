@@ -126,13 +126,12 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
             $scope.removeLine = function(id) {
                 // make impossible to remove france
                 if (id) {
-                    var idxToRemove;
-                    $scope.linesData.forEach(function(d, i) {
+                    $scope.linesData.some(function(d, i) {
                         if (d.id==id){
-                            idxToRemove = i;
+                            $scope.linesData.splice(i, i);
+                            return true;
                         }
                     });
-                    $scope.linesData.splice(idxToRemove, idxToRemove+1);
                 }
             }
             // take first map
@@ -344,13 +343,11 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                         .attr("cy", function(d) { return y(d[1]); })
                         .attr("class", "linecircle")
                         .on("mouseover", function(d) {
-                            var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft,
-                                scrollTop  = document.documentElement.scrollTop || document.body.scrollTop;
                             tooltip.html("<div class='popover-content'> <b>" +
                                 d[0] + " : " + d3.format(".2f")(d[1]) +
                                 "</b></div>");
-                            tooltip.style("left", d3.event.x + scrollLeft + 10 + "px");
-                            tooltip.style("top", d3.event.y + scrollTop - 50 + "px");
+                            tooltip.style("left", d3.event.pageX + 10 + "px");
+                            tooltip.style("top", d3.event.pageY - 50 + "px");
                             tooltip.style("display", 'block')
                             tooltip.transition().duration(200).style("opacity", 0.9);
                         })
