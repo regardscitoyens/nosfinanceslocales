@@ -190,14 +190,21 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                     northEast = L.latLng(refmap.extent[3],
                                          refmap.extent[2]),
                     bounds = L.latLngBounds(southWest, northEast);
-
-                var basemap = new L.TileLayer("http://{s}.tile.stamen.com/toner" +
-                        "/{z}/{x}/{y}.png"), utfGrid;
+                var stamenAttribution = 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>';
+                var basemap = new L.TileLayer(
+                        "http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png",
+                        {attribution: stamenAttribution}),
+                    utfGrid;
                 var layers = [basemap];
                 var yearsToLayers = {}, yearsToUtfGrids = {}, utfGrid, years = [];
+                var dgfipAttribution = 'Data by <a href="http://www.collectivites-locales.gouv.fr/">DGFiP</a> under <a href="http://wiki.data.gouv.fr/wiki/Licence_Ouverte_/_Open_Licence"> LO</a>'
                 for(var imap=0;imap<$scope.timemap.maps.length;imap++) {
                     var map = $scope.timemap.maps[imap];
-                    var layer = new L.TileLayer(mapUtils.getTileUrl(map.id),{opacity: 0, subdomains: 'abc'})
+                    var layer = new L.TileLayer(
+                        mapUtils.getTileUrl(map.id),
+                        {opacity: 0, subdomains: 'abc',
+                         attribution: dgfipAttribution}
+                    );
                     layers.push(layer);
                     yearsToLayers[map.year] = layer;
                     yearsToUtfGrids[map.year] = new L.UtfGrid(mapUtils.getGridUrl(map.id), {useJsonP: false});
