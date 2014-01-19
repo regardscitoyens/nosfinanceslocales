@@ -7,14 +7,16 @@ from pyramid.response import FileResponse
 from cornice import Service
 from cornice.resource import resource, view
 from .models import AdminZoneFinance, DBSession, AdminZone, Stats as StatsModel
-from .maps import map_registry, MAPS_CONFIG
+from .maps import timemap_registry, MAPS_CONFIG
 
-city_search = Service(name='search_city', path='/search_city', description="city search")
+city_search = Service(name='city_search', path='/city_search', description="city search")
 
 @city_search.get()
-def get_info(request):
+def get_city(request):
     term = self.request.matchdict['term']
-    result = DBSession.query(AdminZone.id, AdminZone.name, AdminZone.code_insee).filter()
+    result = DBSession.query(AdminZone.id, AdminZone.name, AdminZone.code_insee)\
+        .filter(func.lower(AdminZone.name).like(func.lower(func.unaccent(term+"%")))).all()
+    return {'results': result}
 
 @resource(collection_path='/timemaps', path='/timemap/{id}')
 class TimeMap(object):

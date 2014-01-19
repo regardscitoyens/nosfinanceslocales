@@ -47,32 +47,6 @@ class AdminZone(Base):
     def code_insee(self):
         return self.code_department + self.code_city
 
-GENDER_MALE = 0
-GENDER_FEMALE = 1
-class Politician(Base):
-    __tablename__ = 'politician'
-    id = Column(Integer, primary_key=True)
-    firstname = Column(Unicode(100))
-    lastname = Column(Unicode(100))
-    gender = Column(SmallInteger)
-
-class Mandate(Base):
-    """ XXX: have only mayor for the moment"""
-    __tablename__ = 'mandate'
-    id = Column(Integer, primary_key=True)
-    politician_id   = Column(Integer, ForeignKey('politician.id'))
-    adminzone_id   = Column(Integer, ForeignKey('adminzone.id'))
-    position = Column(Unicode(100))
-
-class MunicipalElectionResult(Base):
-    __tablename__ = 'municipalelectionresult'
-    id = Column(Integer, primary_key=True)
-    date = Column(DateTime)
-    politician_id   = Column(Integer, ForeignKey('politician.id'))
-    adminzone_id   = Column(Integer, ForeignKey('adminzone.id'))
-    vote = Column(Integer)
-    pct_vote = Column(Float)
-
 class AdminZoneFinance(Base):
     __tablename__ = 'adminzonefinance'
     id = Column(Integer, primary_key=True)

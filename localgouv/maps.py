@@ -164,7 +164,7 @@ class Map(object):
             'maxzoom': 7,
             'scale_colors': colors,
             'scale_range': scale_range,
-            'extent': list(get_extent()), # XXX: cornice bug: if tuple, return {}
+            'extent': list(get_extent()), # XXX: simplejson bug with sqlalchemy list, cast to python list to make it works
         }
 
         self.mapnik_config = {
@@ -176,8 +176,8 @@ class Map(object):
             ],
         }
 
-class MapRegistry(dict):
+class TimeMapRegistry(dict):
     def __missing__(self, key):
         self[key] = [Map(year, key) for year in range(2000, 2013)]
         return self[key]
-map_registry = MapRegistry()
+timemap_registry = TimeMapRegistry()
