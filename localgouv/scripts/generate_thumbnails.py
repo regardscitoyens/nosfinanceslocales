@@ -1,5 +1,6 @@
 
 import os, sys
+import mapnik
 
 from pyramid.paster import (
     get_appsettings,
@@ -9,7 +10,6 @@ from pyramid.paster import (
 from sqlalchemy import engine_from_config
 
 from ..maps import Map, MAPS_CONFIG
-from ..mapnik_render import render_tiles
 from ..carto import carto_convert
 
 from ..models import (
@@ -22,6 +22,18 @@ def usage(argv):
     print('usage: %s <config_uri> [var=value]\n'
           '(example: "%s development.ini")' % (cmd, cmd))
     sys.exit(1)
+
+def create_thumbnail(xmlmap, filepath):
+    shape = (230, 200)
+    m = mapnik.Map(*shape)
+    mapnik.load_map_from_string(m, xmlmap)
+    box = m.layers[0].envelope()
+    prj = mapnik.Projection(m.srs)
+    prj_box = box.forward(prj)
+    m.zoom_to_box(prj_box)
+    im = mapnik.Image(*shape)
+    mapnik.render(m, im)
+    im.save(filepath, 'png256')
 
 def main(argv=sys.argv):
     if len(argv) < 2:
@@ -37,15 +49,14 @@ def main(argv=sys.argv):
     for var_name in MAPS_CONFIG.keys():
         for year in years:
             m = Map(year, var_name)
-            extent = m.info['extent']
             xmlmap = carto_convert(m.mapnik_config)
-            map_tile_dir = os.path.join(settings['base_tile_dir'], m.info['id']) + '/'
+            thumbnail_filepath = os.path.join(settings['static_app_dir'], 'thumbnails')
             try:
-                os.makedirs(map_tile_dir)
+                os.makedirs(thumbnail_filepath)
             except OSError:
                 pass
-            render_tiles(extent, xmlmap, map_tile_dir, m.info['minzoom'], m.info['maxzoom'], name=m.info['name'], fields=[var_name, 'name', 'code_insee', 'id', 'year'], layer_id=0)
-
+            create_thumbnail(xmlmap, os.path.join(thumbnail_filepath, m.info['id']) + '.png')
 
 if __name__ == '__main__':
     main()
+
