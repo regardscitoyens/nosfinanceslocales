@@ -1,7 +1,6 @@
 import os
 import sys
 import transaction
-import json
 
 from fiona import collection
 from shapely.geometry import shape, MultiPolygon
@@ -15,8 +14,6 @@ from pyramid.paster import (
     setup_logging,
     )
 
-from pyramid.scripts.common import parse_vars
-
 from ..models import (
     DBSession,
     AdminZone,
@@ -25,7 +22,6 @@ from ..models import (
     ADMIN_LEVEL_CITY_ARR,
     SRID,
     )
-
 
 def usage(argv):
     cmd = os.path.basename(argv[0])
@@ -80,14 +76,15 @@ def main(argv=sys.argv):
         for city in cities_with_arr:
             wkt_geoms = zip(*DBSession.query(func.ST_AsText(AdminZone.geometry))\
                 .filter(AdminZone.name.contains(city['name']))\
-                .filter(AdminZone.admin_level==ADMIN_LEVEL_CITY)\
+                .filter(AdminZone.admin_level==ADMIN_LEVEL_CITY_ARR)\
                 .all())[0]
             city_geom = cascaded_union([loads(wkt_geom) for wkt_geom in wkt_geoms])
             if city_geom.type == 'Polygon':
                 city_geom = MultiPolygon([city_geom])
-            az = AdminZone(**city)
-            az.geometry = "SRID=%s;"%SRID + city_geom.wkt
-            az.admin_level = ADMIN_LEVEL_CITY
+            az = AdminZone(
+                geometry="SRID=%s;"%SRID + city_geom.wkt, admin_level=ADMIN_LEVEL_CITY,
+                name=city['name'], code_city=city['code_city'], code_department=city['code_department']
+                )
             DBSession.add(az)
 
 if __name__ == '__main__':
