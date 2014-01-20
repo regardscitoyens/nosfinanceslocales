@@ -1,29 +1,20 @@
 import os
 import sys
 import transaction
-import json
 
-from fiona import collection
-from shapely.geometry import shape, MultiPolygon
-from shapely.ops import cascaded_union
-from shapely.wkt import loads
-
-from sqlalchemy import engine_from_config, func
+from sqlalchemy import engine_from_config
 
 from pyramid.paster import (
     get_appsettings,
     setup_logging,
     )
 
-from pyramid.scripts.common import parse_vars
-
 from ..models import (
     DBSession,
     AdminZoneFinance,
-    Stats,
     )
 
-from ..maps import MAPS_CONFIG, quantile_scale
+from ..maps import MAPS_CONFIG
 
 
 def usage(argv):
@@ -56,11 +47,14 @@ def main(argv=sys.argv):
         istart = i*nb/nb_packets
         iend = min((i+1)*nb/nb_packets, nb)
         subresults = results[istart:iend]
+        ids, vals = zip(*subresults)
         with transaction.manager:
             ids = zip(*subresults)[0]
             items = DBSession.query(AdminZoneFinance).filter(AdminZoneFinance.id.in_(ids)).order_by(AdminZoneFinance.id).all()
-            for item, val in zip(items, zip(*subresults)[1]):
-                setattr(item.data, var_name, str(val))
+            if len(subresults) == 0:
+                continue
+            for item, val in zip(items, vals):
+                item.data[var_name] = unicode(val)
 
 if __name__ == '__main__':
     main()
