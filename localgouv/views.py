@@ -14,9 +14,14 @@ city_search = Service(name='city_search', path='/city_search', description="city
 @city_search.get()
 def get_city(request):
     term = self.request.matchdict['term']
-    result = DBSession.query(AdminZone.id, AdminZone.name, AdminZone.code_insee)\
+    results = DBSession.query(AdminZone.id, AdminZone.name, AdminZone.code_insee,
+                             func.ST_X(func.ST_Centroid(AdminZone.geometry)),
+                             func.ST_Y(func.ST_Centroid(AdminZone.geometry)))\
         .filter(func.lower(AdminZone.name).like(func.lower(func.unaccent(term+"%")))).all()
-    return {'results': result}
+    def format(result):
+        return {'id': result[0], 'name': result[1], 'code_insee': result[2],
+                'lat': result[3], 'lng': result[4]}
+    return {'results': [format(res) for res in results]}
 
 @resource(collection_path='/timemaps', path='/timemap/{id}')
 class TimeMap(object):
