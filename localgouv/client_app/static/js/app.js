@@ -1,7 +1,7 @@
 angular.module('app', ['ui.router', 'ui.bootstrap'])
-    .constant('API_ROOT_URL', 'http://www.localfinance.fr/api')
+    .constant('API_ROOT_URL', 'http://www.nosfinanceslocales.fr/api')
     .constant('TILES_ROOT_URL', 'http://{s}.tile.localfinance.fr/tiles') // get this info from server ?
-    .constant('THUMBNAILS_URL', 'http://www.localfinance.fr/static/thumbnails')
+    .constant('THUMBNAILS_URL', '/static/thumbnails')
     .factory('mapUtils', function(TILES_ROOT_URL, THUMBNAILS_URL) {
         return {
             getTileUrl: function(map_id) {
@@ -22,7 +22,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                     return $http.get(API_ROOT_URL + '/' + name + '/' + id)
                         .then(function(response) {
                             return response.data.results;
-                        })
+                        });
                 },
                 all: function() {
                     return $http.get(API_ROOT_URL + '/' + name + 's')
@@ -34,6 +34,16 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
             return resource;
         }
         return Factory
+    })
+    .factory('CitySearch', function($http, API_ROOT_URL) {
+        return {
+            get: function(term) {
+                return $http.get(API_ROOT_URL + '/' + 'city_search' + '?term=' + term)
+                    .then(function(response) {
+                        return response.data.results;
+                    });
+            }
+        }
     })
     .config(
         [ '$stateProvider', '$urlRouterProvider',
@@ -106,8 +116,9 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
             };
             fireDigestEverySecond();
         }])
-    .controller('MapDetailCtrl', ['$scope', '$stateParams', 'Resource', 'mapUtils',
-        function($scope, $stateParams, Resource, mapUtils) {
+    .controller('MapDetailCtrl', ['$scope', '$stateParams', 'Resource', 'mapUtils', 'CitySearch',
+        function($scope, $stateParams, Resource, mapUtils, CitySearch) {
+            $scope.getCities = CitySearch.get;
             var colors = d3.scale.category10();;
             // get the timemap for this variable
             $scope.timemap = $scope.timemaps.filter(function(timemap) {
@@ -193,10 +204,9 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 var stamenAttribution = 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>';
                 var basemap = new L.TileLayer(
                         "http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png",
-                        {attribution: stamenAttribution}),
-                    utfGrid;
+                        {attribution: stamenAttribution});
                 var layers = [basemap];
-                var yearsToLayers = {}, yearsToUtfGrids = {}, utfGrid, years = [];
+                var yearsToLayers = {}, yearsToUtfGrids = {}, currentUtfGrid, years = [];
                 var dgfipAttribution = 'Data by <a href="http://www.collectivites-locales.gouv.fr/">DGFiP</a> under <a href="http://wiki.data.gouv.fr/wiki/Licence_Ouverte_/_Open_Licence"> LO</a>'
                 for(var imap=0;imap<$scope.timemap.maps.length;imap++) {
                     var map = $scope.timemap.maps[imap];
@@ -242,24 +252,24 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                             yearsToLayers[years[iyear]].setOpacity(0);
                         }
                     }
-                    if (utfGrid) {
-                        lmap.removeLayer(utfGrid);
+                    if (currentUtfGrid) {
+                        lmap.removeLayer(currentUtfGrid);
                     }
                     lmap.addLayer(newUtfGrid);
-                    utfGrid = newUtfGrid;
+                    currentUtfGrid = newUtfGrid;
 
                     //Events
-                    utfGrid.on('click', function (e) {
+                    currentUtfGrid.on('click', function (e) {
                         if (e.data) {
                             onClick(e.data);
                         }
                     });
-                    utfGrid.on('mouseover', function (e) {
+                    currentUtfGrid.on('mouseover', function (e) {
                         if (e.data) {
                             onMouseOver(e.data);
                         }
                     });
-                    utfGrid.on('mouseout', function (e) {
+                    currentUtfGrid.on('mouseout', function (e) {
                     });
 
                 }

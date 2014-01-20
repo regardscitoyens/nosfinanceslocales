@@ -5,7 +5,7 @@
   <div class="col-md-3" ng-repeat="timemap in timemaps">
     <div class="thumbnail">
       <!--img ng-src="{{mapUtils.getThumbnailUrl(timemap.maps[0].id)}}" alt="map" class="img-rounded" style="width: 230px; height: 200px;" ui-sref="maps.detail({var_name:timemap.var_name})"-->
-      <carousel interval="3000" class="mycarousel">
+      <carousel interval="5000" class="mycarousel">
         <slide ng-repeat="map in timemap.maps" active="map.active" class="myslide">
         <img ng-src="{{mapUtils.getThumbnailUrl(map.id)}}" alt="map" class="img-rounded" style="width: 230px; height: 200px;" ui-sref="maps.detail({var_name:timemap.var_name})">
           <div class="carousel-caption">

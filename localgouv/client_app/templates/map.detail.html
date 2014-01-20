@@ -32,10 +32,18 @@
   </div>
   <div class="col-md-4">
     <div class="row">
+      <div class="input-group">
+        <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
+        <input type="text" ng-model="city" placeholder="Rechercher une commune..." typeahead="city.name for city in searchCity($viewValue) | filter:$viewValue" typeahead-loading="loadingLocations" typeahead-min-length="2" class="form-control" typeahead-on-select="loadStatCityAndCenterMap">
+        <i ng-show="loadingLocations" class="glyphicon glyphicon-refresh"></i>
+      </div>
+    </div>
+    </br>
+    <div class="row">
       <h4><span class="label label-default"><span class="glyphicon glyphicon-eye-open"></span> Info commune survolée</span></h4>
       <ul class="list-group">
         <li class="list-group-item">Commune: <b>{{mouseOverdata.name}} ({{mouseOverdata.code_insee}})</b></li>
-        <li class="list-group-item">Année: <b>{{mapData.year}}</b></li>
+        <li class="list-group-item">Année: <b>{{year}}</b></li>
         <li class="list-group-item">{{mapData.description}}: <b>{{mouseOverdata[timemap.var_name]|number:2}}</b></li>
       </ul>
     </div>
