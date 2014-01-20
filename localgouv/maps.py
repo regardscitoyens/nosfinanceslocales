@@ -10,7 +10,7 @@ from sqlalchemy.sql import compiler
 from psycopg2.extensions import adapt as sqlescape
 
 
-from .models import DBSession, AdminZone, AdminZoneFinance, Stats, SRID
+from .models import DBSession, AdminZone, AdminZoneFinance, Stats, SRID, ADMIN_LEVEL_CITY
 
 POP_VAR = cast(AdminZoneFinance.data['population'], Float)
 
@@ -126,7 +126,7 @@ def france_layer(layer_id, query):
 
 def map_query(year, variable, variable_filter):
     q = DBSession.query(AdminZone.id, AdminZone.geometry, AdminZone.name, AdminZone.code_insee.label('code_insee'), AdminZoneFinance.year, variable)
-    return compile_query(q.filter(AdminZoneFinance.year==year).filter(variable_filter).join(AdminZoneFinance, AdminZone.id==AdminZoneFinance.adminzone_id))
+    return compile_query(q.filter(AdminZoneFinance.year==year).filter(AdminZone.admin_level==ADMIN_LEVEL_CITY).filter(variable_filter).join(AdminZoneFinance, AdminZone.id==AdminZoneFinance.adminzone_id))
 
 def scale_mss(layer, var_name, x, colors):
     styles = []
