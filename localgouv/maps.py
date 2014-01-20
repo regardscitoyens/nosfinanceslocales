@@ -161,7 +161,7 @@ class Map(object):
             'name': name,
             'id': "%s_%s"%(name, year),
             'minzoom': 5,
-            'maxzoom': 7,
+            'maxzoom': 9,
             'scale_colors': colors,
             'scale_range': scale_range,
             'extent': list(get_extent()), # XXX: simplejson bug with sqlalchemy list, cast to python list to make it works
