@@ -13,12 +13,14 @@ def main(global_config, **settings):
     DBSession.configure(bind=engine)
     Base.metadata.bind = engine
     config = Configurator(settings=settings)
-    # for dev purpose
-    config.add_static_view('static', 'client_app/static', cache_max_age=3600)
-    config.add_static_view('templates', 'client_app/templates', cache_max_age=3600)
-    config.add_view('localgouv.views.index', route_name='index')
+
+    # XXX Add app static files and index route for dev purpose only
+    config.add_static_view('app', settings['app_dir'], cache_max_age=3600)
+    config.add_view('localfinance.views.index', route_name='index')
     config.add_route('index', '/')
+
+    # API
     config.include("cornice")
     config.route_prefix = '/api'
-    config.scan("localgouv.views")
+    config.scan("localfinance.views")
     return config.make_wsgi_app()

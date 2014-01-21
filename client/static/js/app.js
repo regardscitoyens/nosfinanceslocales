@@ -1,7 +1,7 @@
 angular.module('app', ['ui.router', 'ui.bootstrap'])
     .constant('API_ROOT_URL', 'http://www.nosfinanceslocales.fr/api')
     .constant('TILES_ROOT_URL', 'http://{s}.tile.localfinance.fr/tiles') // get this info from server ?
-    .constant('THUMBNAILS_URL', '/static/thumbnails')
+    .constant('THUMBNAILS_URL', '/app/static/thumbnails')
     .factory('mapUtils', function(TILES_ROOT_URL, THUMBNAILS_URL) {
         return {
             getTileUrl: function(map_id) {
@@ -53,13 +53,13 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
             $stateProvider
                 .state('about', {
                     url: '/about',
-                    templateUrl: 'templates/about.html',
+                    templateUrl: '/app/templates/about.html',
                 })
                 .state('localfinance', {
                     url: '/{id:[0-9]{1,4}}',
                     views: {
                         '': {
-                            templateUrl: 'templates/localfinance.detail.html',
+                            templateUrl: '/app/templates/localfinance.detail.html',
                             controller: 'LocalFinanceDetailCtrl'
                         },
                     }
@@ -67,7 +67,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 .state('maps', {
                     abstract: true,
                     url: '/maps',
-                    templateUrl: 'templates/maps.html',
+                    templateUrl: '/app/templates/maps.html',
                     controller: 'MapsCtrl',
                     resolve: {
                         timemaps: function(Resource) {
@@ -82,7 +82,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                     url: '/',
                     views: {
                         '': {
-                            templateUrl: 'templates/map.list.html',
+                            templateUrl: '/app/templates/map.list.html',
                             controller: 'MapListCtrl'
                         }
                     }
@@ -91,7 +91,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                     url: '/{var_name}',
                     views: {
                         '': {
-                            templateUrl: 'templates/map.detail.html',
+                            templateUrl: '/app/templates/map.detail.html',
                             controller: 'MapDetailCtrl'
                         }
                     }
@@ -225,7 +225,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                         {attribution: stamenAttribution});
                 var layers = [basemap];
                 var yearsToLayers = {}, yearsToUtfGrids = {}, currentUtfGrid, years = [];
-                var rcAttribution = '<a href="http://www.nosdonnees.fr/dataset/donnees-comptables-et-fiscales-des-collectivites-locales">Data</a> freed by <a href="http://www.regardscitoyens.org">Regards Citoyens</a> <img src="/static/opendata.png" height="12">'
+                var rcAttribution = '<a href="http://www.nosdonnees.fr/dataset/donnees-comptables-et-fiscales-des-collectivites-locales">Data</a> freed by <a href="http://www.regardscitoyens.org">Regards Citoyens</a> <img src="/app/static/opendata.png" height="12">'
                 for(var imap=0;imap<$scope.timemap.maps.length;imap++) {
                     var map = $scope.timemap.maps[imap];
                     var layer = new L.TileLayer(

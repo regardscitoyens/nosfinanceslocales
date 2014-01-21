@@ -57,9 +57,9 @@ class Stats(object):
         stats = DBSession.query(StatsModel).all()
         return {'results': [{'mean_by_year': json.loads(stat.data['mean_by_year']), 'var_name': stat.name} for stat in stats]}
 
-# view for development purpose
+
+# XXX: view set for development purpose only
 from pyramid.response import FileResponse
 def index(request):
-    here = os.path.dirname(__file__)
-    html_file = os.path.join(here, 'client_app', 'index.html')
+    html_file = os.path.join(request.registry.settings['app_dir'], 'index.html')
     return FileResponse(html_file)

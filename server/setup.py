@@ -5,13 +5,12 @@ from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-with open(os.path.join(here, 'README.rst')) as f:
-    README = f.read()
+README = ""
 
 
-setup(name='localgouv',
+setup(name='localfinance',
     version=0.1,
-    description='localgouv',
+    description='localfinance',
     long_description=README,
     classifiers=[
         "Programming Language :: Python",
@@ -29,10 +28,7 @@ setup(name='localgouv',
     install_requires=['zope.sqlalchemy', 'sqlalchemy', 'cornice', 'waitress', 'geoalchemy2', 'brewer2mpl', 'fiona', 'shapely', 'numpy', 'pandas', 'psycopg2'],
     entry_points = """\
     [paste.app_factory]
-    main = localgouv:main
-    [console_scripts]
-    localgouv_initializedb = localgouv.scripts.initializedb:main
-    localgouv_load_adminzones = localgouv.scripts.filladminzone:main
+    main = localfinance:main
     """,
     paster_plugins=['pyramid'],
 )
