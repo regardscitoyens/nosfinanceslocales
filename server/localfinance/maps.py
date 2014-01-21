@@ -44,7 +44,13 @@ MAPS_CONFIG = {
         'sql_variable': cast(AdminZoneFinance.data['home_tax_value'], Float) / POP_VAR,
         'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['home_tax_value'] <> 'nan'),
         'colors': lambda size: brewer2mpl.get_map('BuPu', 'Sequential', size)
-    }
+    },
+    'operating_revenues_per_person': {
+        'description': u'Total des charges de fonctionnement par commune par habitant (en €)',
+        'sql_variable': cast(AdminZoneFinance.data['operating_revenues'], Float) / POP_VAR,
+        'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['operating_revenues'] <> 'nan'),
+        'colors': lambda size: brewer2mpl.get_map('Spectral', 'Diverging', size)
+    },
 }
 
 BORDERS_MSS = """
