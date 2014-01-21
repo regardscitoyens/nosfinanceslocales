@@ -23,7 +23,7 @@ def get_city(request):
         .order_by(func.similarity(AdminZone.name, 'orl').desc()).all()
     def format(result):
         return {'id': result[0], 'name': result[1], 'code_insee': result[2],
-                'lat': result[3], 'lng': result[4]}
+                'lng': result[3], 'lat': result[4]}
     return {'results': [format(res) for res in results]}
 
 @resource(collection_path='/timemaps', path='/timemap/{id}')
