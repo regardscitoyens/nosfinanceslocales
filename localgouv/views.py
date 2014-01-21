@@ -2,6 +2,7 @@
 
 import os
 import json
+from sqlalchemy import func
 from pyramid.view import view_config
 from pyramid.response import FileResponse
 from cornice import Service
