@@ -6,18 +6,20 @@ from pyramid.view import view_config
 from pyramid.response import FileResponse
 from cornice import Service
 from cornice.resource import resource, view
-from .models import AdminZoneFinance, DBSession, AdminZone, Stats as StatsModel
+from .models import AdminZoneFinance, DBSession, AdminZone, Stats as StatsModel, ADMIN_LEVEL_CITY
 from .maps import timemap_registry, MAPS_CONFIG
 
 city_search = Service(name='city_search', path='/city_search', description="city search")
 
 @city_search.get()
 def get_city(request):
-    term = self.request.matchdict['term']
+    term = request.params['term']
     results = DBSession.query(AdminZone.id, AdminZone.name, AdminZone.code_insee,
                              func.ST_X(func.ST_Centroid(AdminZone.geometry)),
                              func.ST_Y(func.ST_Centroid(AdminZone.geometry)))\
-        .filter(func.lower(AdminZone.name).like(func.lower(func.unaccent(term+"%")))).all()
+        .filter(func.lower(AdminZone.name).like(func.lower(func.unaccent(term+"%"))))\
+        .filter(AdminZone.admin_level==ADMIN_LEVEL_CITY)\
+        .order_by(func.similarity(AdminZone.name, 'orl').desc()).all()
     def format(result):
         return {'id': result[0], 'name': result[1], 'code_insee': result[2],
                 'lat': result[3], 'lng': result[4]}
