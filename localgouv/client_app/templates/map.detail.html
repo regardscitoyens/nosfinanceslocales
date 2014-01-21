@@ -12,7 +12,7 @@
   <div class="col-md-7">
     <div class="row">
       <input type="range" ng-model="year" value="2000" min="2000" max="2012" step="0.1" style="width:95%">
-      <div leaflet-map style="width:95%;height:650px" timemap="timemap" year="year" on-click="onClick" on-mouse-over="onMouseOver" on-mouse-out="onMouseOut"></div>
+      <div leaflet-map style="width:95%;height:650px" timemap="timemap" year="year" on-click="onClick" on-mouse-over="onMouseOver" on-mouse-out="onMouseOut" options="mapOptions"></div>
     </div>
     <div class="row">
       <div class='legend'>
@@ -33,9 +33,11 @@
   <div class="col-md-4">
     <div class="row">
       <div class="input-group">
-        <span class="input-group-addon"><i class="glyphicon glyphicon-search"></i></span>
-        <input type="text" ng-model="city" placeholder="Rechercher une commune..." typeahead="city.name for city in searchCity($viewValue) | filter:$viewValue" typeahead-loading="loadingLocations" typeahead-min-length="2" class="form-control" typeahead-on-select="loadStatCityAndCenterMap">
-        <i ng-show="loadingLocations" class="glyphicon glyphicon-refresh"></i>
+        <span class="input-group-addon">
+          <i ng-show="!loadingLocations" class="glyphicon glyphicon-search"></i>
+          <i ng-show="loadingLocations" class="glyphicon glyphicon-refresh"></i>
+        </span>
+        <input type="text" ng-model="city" placeholder="Rechercher une commune..." typeahead="city as city.name for city in getCities($viewValue) | filter:$viewValue" typeahead-loading="loadingLocations" typeahead-min-length="2" class="form-control" typeahead-on-select="centerMapAndLoadStatCity(city)">
       </div>
     </div>
     </br>

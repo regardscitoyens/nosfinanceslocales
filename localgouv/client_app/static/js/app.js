@@ -119,6 +119,17 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
     .controller('MapDetailCtrl', ['$scope', '$stateParams', 'Resource', 'mapUtils', 'CitySearch',
         function($scope, $stateParams, Resource, mapUtils, CitySearch) {
             $scope.getCities = CitySearch.get;
+            $scope.centerMapAndLoadStatCity = function(city) {
+                // first update map
+                $scope.mapOptions = {
+                    zoom: 8,
+                    lat: city.lat,
+                    lng: city.lng
+                }
+
+                // then get stats of the city
+                $scope.loadCityFinance(city.id);
+            };
             var colors = d3.scale.category10();;
             // get the timemap for this variable
             $scope.timemap = $scope.timemaps.filter(function(timemap) {
@@ -154,22 +165,29 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 })[0];
             }
             $scope.mapData = findMapData($scope.timemap.maps[0].year);
-            $scope.onClick = function(data) {
+            $scope.loadCityFinance = function(id) {
                 function checkLine(id) {
-                    return ($scope.linesData.filter(function(d){return (data.id==d.id)}).length > 0)
+                    return ($scope.linesData.filter(function(d){return (id==d.id)}).length > 0)
                 }
-                if  (checkLine(data.id)) {
+                if  (checkLine(id)) {
                     return ;
                 }
-                Resource('finance').get(data.id).then(function(results) {
+                Resource('finance').get(id).then(function(results) {
+                    if (results.length == 0) {
+                        console.log("No data");
+                        return;
+                    }
                     // get var_name stat
                     var res = results.map(function(d){
                         return [d.year, parseFloat(d.data[$scope.timemap.var_name])];
                     })
-                    if (!checkLine(data.id)) {
-                        $scope.linesData.push({name: results[0].name, data: res, color: colors(results[0].name), id: data.id});
+                    if (!checkLine(id)) {
+                        $scope.linesData.push({name: results[0].name, data: res, color: colors(results[0].name), id: id});
                     }
                 });
+            }
+            $scope.onClick = function(data) {
+                $scope.loadCityFinance(data.id);
                 $scope.$apply();
             }
             $scope.onMouseOver = function(data) {
@@ -185,7 +203,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
             scope: {
                 timemap: '=',
                 year: '=',
-                opacityFactor: '=',
+                options: '=',
                 click: '&onClick',
                 mouseOver: '&onMouseOver',
                 mouseOut: '&onMouseOut'
@@ -207,13 +225,13 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                         {attribution: stamenAttribution});
                 var layers = [basemap];
                 var yearsToLayers = {}, yearsToUtfGrids = {}, currentUtfGrid, years = [];
-                var dgfipAttribution = 'Data by <a href="http://www.collectivites-locales.gouv.fr/">DGFiP</a> under <a href="http://wiki.data.gouv.fr/wiki/Licence_Ouverte_/_Open_Licence"> LO</a>'
+                var rcAttribution = '<a href="http://www.nosdonnees.fr/dataset/donnees-comptables-et-fiscales-des-collectivites-locales">Data</a> freed by <a href="http://www.regardscitoyens.org">Regards Citoyens</a> <img src="/static/opendata.png" height="12">'
                 for(var imap=0;imap<$scope.timemap.maps.length;imap++) {
                     var map = $scope.timemap.maps[imap];
                     var layer = new L.TileLayer(
                         mapUtils.getTileUrl(map.id),
                         {opacity: 0, subdomains: 'abc',
-                         attribution: dgfipAttribution}
+                         attribution: rcAttribution}
                     );
                     layers.push(layer);
                     yearsToLayers[map.year] = layer;
@@ -233,6 +251,12 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 // leaflet map
                 var lmap = L.map(element[0], options)
                     .addLayer(interactiveLayerGroup);
+
+                $scope.$watch('options', function(newVal, oldVal) {
+                    if (!newVal) return;
+                    lmap.setZoom(newVal.zoom);
+                    lmap.panTo(new L.LatLng(newVal.lat, newVal.lng));
+                }, true);
 
                 $scope.$watch('year', function(newVal, oldVal) {
                     return $scope.render(newVal);
@@ -287,8 +311,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 // data = [{name: '', data: ''},]
                 var tooltip = d3.select(document.createElement('div'))
                     .append("div")
-                    .attr("class", "mytooltip popover")
-                    .style("opacity", 0)
+                    .attr("class", "popover")
                     .style("display", 'none');
                 document.body.appendChild(tooltip.node());
 
@@ -366,10 +389,8 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                             tooltip.style("left", d3.event.pageX + 10 + "px");
                             tooltip.style("top", d3.event.pageY - 50 + "px");
                             tooltip.style("display", 'block')
-                            tooltip.transition().duration(200).style("opacity", 0.9);
                         })
                         .on("mouseout", function(d) {
-                            tooltip.transition().duration(200).style("opacity", 0);
                             tooltip.style("display", 'none')
                         })
                         .style("pointer-events","all")
