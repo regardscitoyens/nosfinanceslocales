@@ -1,6 +1,6 @@
 angular.module('app', ['ui.router', 'ui.bootstrap'])
     .constant('API_ROOT_URL', 'http://www.nosfinanceslocales.fr/api')
-    .constant('TILES_ROOT_URL', 'http://{s}.tile.localfinance.fr/tiles') // get this info from server ?
+    .constant('TILES_ROOT_URL', 'http://{s}.tile.nosfinanceslocales.fr/tiles') // get this info from server ?
     .constant('THUMBNAILS_URL', '/app/static/thumbnails')
     .factory('mapUtils', function(TILES_ROOT_URL, THUMBNAILS_URL) {
         return {
