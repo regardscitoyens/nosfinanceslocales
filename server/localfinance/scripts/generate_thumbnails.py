@@ -50,7 +50,7 @@ def main(argv=sys.argv):
         for year in years:
             m = Map(year, var_name)
             xmlmap = carto_convert(m.mapnik_config)
-            thumbnail_filepath = os.path.join(settings['static_app_dir'], 'thumbnails')
+            thumbnail_filepath = os.path.join(settings['app_dir'], 'static', 'thumbnails')
             try:
                 os.makedirs(thumbnail_filepath)
             except OSError:
