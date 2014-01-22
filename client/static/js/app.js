@@ -254,8 +254,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
 
                 $scope.$watch('options', function(newVal, oldVal) {
                     if (!newVal) return;
-                    lmap.setZoom(newVal.zoom);
-                    lmap.panTo(new L.LatLng(newVal.lat, newVal.lng));
+                    lmap.setView(new L.LatLng(newVal.lat, newVal.lng), newVal.zoom);
                 }, true);
 
                 $scope.$watch('year', function(newVal, oldVal) {
