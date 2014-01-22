@@ -20,7 +20,7 @@ def get_city(request):
                              func.ST_Y(func.ST_Centroid(AdminZone.geometry)))\
         .filter(func.lower(AdminZone.name).like(func.lower(func.unaccent(term+"%"))))\
         .filter(AdminZone.admin_level==ADMIN_LEVEL_CITY)\
-        .order_by(func.similarity(AdminZone.name, 'orl').desc()).all()
+        .order_by(func.similarity(AdminZone.name, term).desc()).all()
     def format(result):
         return {'id': result[0], 'name': result[1], 'code_insee': result[2],
                 'lng': result[3], 'lat': result[4]}
