@@ -12,7 +12,7 @@
   <div class="col-md-7">
     <div class="row">
       <input type="range" ng-model="year" value="2000" min="2000" max="2012" step="0.1" style="width:95%">
-      <div leaflet-map style="width:95%;height:650px" timemap="timemap" year="year" on-click="onClick" on-mouse-over="onMouseOver" on-mouse-out="onMouseOut" options="mapOptions"></div>
+      <div leaflet-map style="width:95%;height:650px" timemap="timemap" year="year" on-click="onClick" on-mouse-over="onMouseOver" on-mouse-out="onMouseOut" options="mapOptions" variables="{year: year, opacity: opacity}"></div>
     </div>
     <div class="row">
       <div class='legend'>
@@ -23,9 +23,6 @@
             {{mapData.scale_range[$index]|number:2}}
             </li>
           </ul>
-        </div>
-        <div class='legend-source'>
-          Source: <a href="http://www.collectivites-locales.gouv.fr/">DGFIP</a>
         </div>
       </div>
     </div>
@@ -54,6 +51,9 @@
       <a class="btn btn-primary btn-xs" style="background-color:{{lineData.color}};margin-right:3px;margin-bottom:2px;border-color:{{lineData.color}}" ng-click="removeLine(lineData.id)" ng-repeat="lineData in linesData"><b>{{lineData.name}}</b></a>
       <div line-chart data="linesData" name="test"></div>
     </div>
-
+    <div class="row">
+      <h4><span class="label label-default">Opacité</span></h4>
+      <input type="range" ng-model="opacity" value="0.8" min="0" max="1" step="0.1" style="width:100%">
+    </div>
   </div>
 </div>

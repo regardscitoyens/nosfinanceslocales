@@ -158,7 +158,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
             }
             // take first map
             $scope.year = $scope.timemap.maps[0].year;
-            $scope.opacity = 0.85;
+            $scope.opacity = 0.8;
             function findMapData(year){
                 return $scope.timemap.maps.filter(function(m) {
                     return (m.year == year)
@@ -202,7 +202,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
             replace: false,
             scope: {
                 timemap: '=',
-                year: '=',
+                variables: '=',
                 options: '=',
                 click: '&onClick',
                 mouseOver: '&onMouseOver',
@@ -238,6 +238,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                     yearsToUtfGrids[map.year] = new L.UtfGrid(mapUtils.getGridUrl(map.id), {useJsonP: false});
                     years.push(map.year);
                 }
+                //layers.push(new L.TileLayer("http://{s}.www.toolserver.org/tiles/osm-labels-fr/{z}/{x}/{y}.png"));
 
                 var interactiveLayerGroup = L.layerGroup(layers);
 
@@ -257,20 +258,22 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                     lmap.setView(new L.LatLng(newVal.lat, newVal.lng), newVal.zoom);
                 }, true);
 
-                $scope.$watch('year', function(newVal, oldVal) {
-                    return $scope.render(newVal);
+                $scope.$watch('variables', function(newVal, oldVal) {
+                    return $scope.render(newVal.opacity, newVal.year);
                 }, true);
 
-                $scope.render = function(year) {
+                $scope.render = function(opacity, year) {
                     if (!year) {
                         return;
                     }
                     var yearLow = Math.floor(year), newUtfGrid = yearsToUtfGrids[yearLow];
                     for (var iyear=0;iyear<years.length;iyear++) {
+                        // XXX: find a better way to set opacity for better ux
+                        var x = (year-yearLow);
                         if (years[iyear] == yearLow) {
-                            yearsToLayers[yearLow].setOpacity(Math.max(1, 1-(year-yearLow) + 0.5));
+                            yearsToLayers[yearLow].setOpacity(opacity * (1 - x * x * x));
                         } else if (years[iyear] == yearLow+1) {
-                            yearsToLayers[yearLow+1].setOpacity(-(yearLow-year));
+                            yearsToLayers[yearLow+1].setOpacity(opacity * (x + x * x)/2);
                         } else {
                             yearsToLayers[years[iyear]].setOpacity(0);
                         }
