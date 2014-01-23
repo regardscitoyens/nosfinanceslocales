@@ -46,7 +46,7 @@ MAPS_CONFIG = {
         'colors': lambda size: brewer2mpl.get_map('BuPu', 'Sequential', size)
     },
     'operating_revenues_per_person': {
-        'description': u'Total des charges de fonctionnement par commune par habitant (en €)',
+        'description': u'Total des produits de fonctionnement par commune par habitant (en €)',
         'sql_variable': cast(AdminZoneFinance.data['operating_revenues'], Float) / POP_VAR,
         'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['operating_revenues'] <> 'nan'),
         'colors': lambda size: brewer2mpl.get_map('Spectral', 'Diverging', size)
