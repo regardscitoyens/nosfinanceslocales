@@ -48,11 +48,11 @@ def main(argv=sys.argv):
         iend = min((i+1)*nb/nb_packets, nb)
         subresults = results[istart:iend]
         ids, vals = zip(*subresults)
+        if len(subresults) == 0:
+            continue
         with transaction.manager:
             ids = zip(*subresults)[0]
             items = DBSession.query(AdminZoneFinance).filter(AdminZoneFinance.id.in_(ids)).order_by(AdminZoneFinance.id).all()
-            if len(subresults) == 0:
-                continue
             for item, val in zip(items, vals):
                 item.data[var_name] = unicode(val)
 
