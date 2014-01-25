@@ -2,6 +2,7 @@
 
 import os
 import json
+import unidecode
 from sqlalchemy import func
 from pyramid.view import view_config
 from pyramid.response import FileResponse
@@ -15,10 +16,11 @@ city_search = Service(name='city_search', path='/city_search', description="city
 @city_search.get()
 def get_city(request):
     term = request.params['term']
+    term_ascii = unicodedata.normalize('NFKD', unicode(term)).encode('ascii', 'ignore').lower()
     results = DBSession.query(AdminZone.id, AdminZone.name, AdminZone.code_insee,
                              func.ST_X(func.ST_Centroid(AdminZone.geometry)),
                              func.ST_Y(func.ST_Centroid(AdminZone.geometry)))\
-        .filter(func.lower(AdminZone.name).like(func.lower(func.unaccent(term+"%"))))\
+        .filter(func.lower(AdminZone.name).like(term_ascii+"%"))\
         .filter(AdminZone.admin_level==ADMIN_LEVEL_CITY)\
         .order_by(func.similarity(AdminZone.name, term).desc()).all()
     def format(result):
