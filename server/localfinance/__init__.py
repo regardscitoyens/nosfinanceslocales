@@ -22,6 +22,6 @@ def main(global_config, **settings):
 
     # API
     config.include("cornice")
-    config.route_prefix = '/api'
+    config.route_prefix = settings['route_prefix']
     config.scan("localfinance.views")
     return config.make_wsgi_app()
