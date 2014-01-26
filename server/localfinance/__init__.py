@@ -1,5 +1,6 @@
 """Main entry point
 """
+import os
 from pyramid.config import Configurator
 from sqlalchemy import engine_from_config
 
@@ -14,8 +15,8 @@ def main(global_config, **settings):
     Base.metadata.bind = engine
     config = Configurator(settings=settings)
 
-    # XXX Add app static files and index route for dev purpose only
-    config.add_static_view('app', settings['app_dir'], cache_max_age=3600)
+    # XXX Add client static files and index route for dev purpose only
+    config.add_static_view('static', os.path.join(settings['client_dir'], 'static'), cache_max_age=3600)
     config.add_view('localfinance.views.index', route_name='index')
     config.add_route('index', '/')
 

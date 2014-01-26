@@ -1,8 +1,11 @@
 <div class="page-header">
   <h3> Cartographies des finances de nos communes - 2000 à 2012 </h3>
-    <small> Données disponibles sur <a href="http://www.nosdonnees.fr/dataset/donnees-comptables-et-fiscales-des-collectivites-locales">NosDonnées.fr</a> en <img src="/app/static/opendata.png" height="15"></small>
-
-</div>
+  <h4><a href="https://twitter.com/share" class="twitter-share-button" data-url="http://www.nosfinanceslocales.fr/" data-text="Cartographie des finances des communes de France!" data-via="regardscitoyens" data-lang="fr" data-hashtags="OpenData">Tweeter</a>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script></h4>
+    <small> Données disponibles sur <a href="http://www.nosdonnees.fr/dataset/donnees-comptables-et-fiscales-des-collectivites-locales">NosDonnées.fr</a> en <img src="/static/img/opendata.png" height="15"></small>
+  </div>
+  <div class="row">
+      </div>
 <div class="row">
   <div class="col-md-3" ng-repeat="timemap in timemaps">
     <div class="thumbnail">
@@ -16,7 +19,7 @@
         </slide>
       </carousel>
       <div class="caption">
-        <h4><a ui-sref="maps.detail({var_name:timemap.var_name})">{{timemap.maps[0].description|limitTo:45}}</a></h3>
+        <h4><a ui-sref="maps.detail({var_name:timemap.var_name})">{{timemap.maps[0].description|limitTo:42}}...</a></h3>
         <p>
           Médiane: {{timemap.maps[0].scale_range[5]|number:2}}
         </p>

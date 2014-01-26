@@ -2,7 +2,7 @@
 
 import os
 import json
-import unidecode
+import unicodedata
 from sqlalchemy import func
 from pyramid.view import view_config
 from pyramid.response import FileResponse
@@ -63,5 +63,5 @@ class Stats(object):
 # XXX: view set for development purpose only
 from pyramid.response import FileResponse
 def index(request):
-    html_file = os.path.join(request.registry.settings['app_dir'], 'index.html')
+    html_file = os.path.join(request.registry.settings['client_dir'], 'index.html')
     return FileResponse(html_file)
