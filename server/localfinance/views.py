@@ -44,8 +44,8 @@ class AZFinance(object):
         self.request = request
     def get(self):
         id = self.request.matchdict['id']
-        res = DBSession.query(AdminZone.name, AdminZone.code_insee, AdminZone.code_department, AdminZoneFinance.year, AdminZoneFinance.data).join(AdminZoneFinance, AdminZone.id==AdminZoneFinance.adminzone_id).filter(AdminZone.id==id).order_by('year').all()
-        return {'results': res}
+        results = DBSession.query(AdminZone.name, AdminZone.code_insee, AdminZone.code_department, AdminZoneFinance.year, AdminZoneFinance.data).join(AdminZoneFinance, AdminZone.id==AdminZoneFinance.adminzone_id).filter(AdminZone.id==id).order_by('year').all()
+        return {'results': [{'name': res[0], 'year': res[3], 'data': res[4]} for res in results]}
 
 @resource(collection_path='/stats', path='/stat/{id}')
 class Stats(object):
