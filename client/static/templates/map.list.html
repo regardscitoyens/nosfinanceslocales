@@ -11,7 +11,7 @@
       <carousel interval="5000" class="mycarousel">
         <slide ng-repeat="map in timemap.maps" active="map.active" class="myslide">
         <img ng-src="{{mapUtils.getThumbnailUrl(map.id)}}" alt="map" class="img-rounded" style="width: 230px; height: 200px;" ui-sref="maps.detail({var_name:timemap.var_name})">
-          <div class="carousel-caption">
+          <div class="carousel-caption" ui-sref="maps.detail({var_name:timemap.var_name})">
             <h4>{{map.year}}</h4>
           </div>
         </slide>
