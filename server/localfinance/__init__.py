@@ -21,6 +21,8 @@ def main(global_config, **settings):
     config.add_route('index', '/')
 
     # API
+    if settings['route_prefix']:
+        config.route_prefix = settings['route_prefix']
     config.include("cornice")
     config.route_prefix = settings['route_prefix']
     config.scan("localfinance.views")
