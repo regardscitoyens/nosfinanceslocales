@@ -36,7 +36,7 @@ class TimeMap(object):
         id = self.request.matchdict['id']
         return {'results': {'var_name': id, 'maps': [m.info for m in timemap_registry[id]]}}
     def collection_get(self):
-        return {'results': [{'var_name': key, 'maps': [m.info for m in timemap_registry[key]]} for key in MAPS_CONFIG.keys()]}
+        return {'results': [{'var_name': key, 'maps': [m.info for m in timemap_registry[key]]} for key in sorted(MAPS_CONFIG.keys())]}
 
 @resource(collection_path='/finance', path='/finance/{id}')
 class AZFinance(object):
