@@ -47,10 +47,10 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
         }
     })
     .config(
-        [ '$stateProvider', '$urlRouterProvider', 'TEMPLATE_URL',
-        function ($stateProvider, $urlRouterProvider, TEMPLATE_URL) {
-            $urlRouterProvider.when('', '/maps/');
-            $urlRouterProvider.otherwise('/maps/');
+        [ '$stateProvider', '$urlRouterProvider', '$locationProvider', 'TEMPLATE_URL',
+        function ($stateProvider, $urlRouterProvider, $locationProvider, TEMPLATE_URL) {
+            $locationProvider.html5Mode(true);
+            $urlRouterProvider.otherwise('/');
             $stateProvider
                 .state('about', {
                     url: '/about',
@@ -67,7 +67,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 })
                 .state('maps', {
                     abstract: true,
-                    url: '/maps',
+                    url: '',
                     templateUrl: TEMPLATE_URL + '/maps.html',
                     controller: 'MapsCtrl',
                     resolve: {
