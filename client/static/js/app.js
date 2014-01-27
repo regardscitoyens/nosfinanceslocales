@@ -47,9 +47,8 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
         }
     })
     .config(
-        [ '$stateProvider', '$urlRouterProvider', '$locationProvider', 'TEMPLATE_URL',
-        function ($stateProvider, $urlRouterProvider, $locationProvider, TEMPLATE_URL) {
-            $locationProvider.html5Mode(true);
+        [ '$stateProvider', '$urlRouterProvider', 'TEMPLATE_URL',
+        function ($stateProvider, $urlRouterProvider, TEMPLATE_URL) {
             $urlRouterProvider.otherwise('/');
             $stateProvider
                 .state('about', {
@@ -151,10 +150,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 }
 
                 // then get stats of the city
-                //$scope.loadCityFinance(city.id);
-                $state.transitionTo('maps.detail', {
-                    var_name: $stateParams.var_name,
-                });
+                $scope.loadCityFinance(city.id);
             };
 
             // Data for line chart
