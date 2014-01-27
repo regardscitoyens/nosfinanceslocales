@@ -1,5 +1,5 @@
 angular.module('app', ['ui.router', 'ui.bootstrap'])
-    .constant('API_ROOT_URL', 'http://www.localfinance.fr/api')
+    .constant('API_ROOT_URL', 'http://www.nosfinanceslocales.fr/api')
     .constant('TILES_ROOT_URL', 'http://{s}.tile.nosfinanceslocales.fr/tiles') // get this info from server ?
     .constant('THUMBNAILS_URL', '/static/thumbnails')
     .constant('TEMPLATE_URL', '/static/templates')
