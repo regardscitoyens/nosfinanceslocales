@@ -89,14 +89,14 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                     }
                 })
                 .state('maps.detail', {
-                    url: '/{var_name}',
+                    url: '/{var_name:[0-9a-zA-Z_]+}?ids',
                     views: {
                         '': {
                             templateUrl: TEMPLATE_URL + '/map.detail.html',
                             controller: 'MapDetailCtrl'
                         }
                     }
-                });
+                })
         }])
     .controller('Home', ['$scope', '$state',
         function($scope, $state, stats) {
@@ -112,65 +112,18 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
     .controller('MapListCtrl', ['$scope', '$state', '$timeout',
         function($scope, $state, $timeout) {
             $scope.thumbailUrls = [];
-            function fireDigestEverySecond() {
-                $timeout(fireDigestEverySecond , 1000);
-            };
-            fireDigestEverySecond();
         }])
-    .controller('MapDetailCtrl', ['$scope', '$stateParams', 'Resource', 'mapUtils', 'CitySearch',
-        function($scope, $stateParams, Resource, mapUtils, CitySearch) {
-            $scope.getCities = CitySearch.get;
-            $scope.centerMapAndLoadStatCity = function(city) {
-                // first update map
-                $scope.mapOptions = {
-                    zoom: 8,
-                    lat: city.lat,
-                    lng: city.lng
-                }
+    .controller('MapDetailCtrl', ['$scope', '$state', '$stateParams', 'Resource', 'mapUtils', 'CitySearch',
+        function($scope, $state, $stateParams, Resource, mapUtils, CitySearch) {
+            // Colors used for line chart
+            var colors = d3.scale.category10();
 
-                // then get stats of the city
-                $scope.loadCityFinance(city.id);
-            };
-            var colors = d3.scale.category10();;
-            // get the timemap for this variable
-            $scope.timemap = $scope.timemaps.filter(function(timemap) {
-                return (timemap.var_name == $stateParams.var_name)
-            })[0];
-            // same for stats
-            $scope.linesData = [
-                {
-                    name: 'FRANCE',
-                    data: $scope.stats.filter(function(stat){
-                        return (stat.var_name == $stateParams.var_name)
-                    })[0].mean_by_year,
-                    color: colors('FRANCE')
-                }
-            ];
-            $scope.removeLine = function(id) {
-                // make impossible to remove france
-                if (id) {
-                    $scope.linesData.some(function(d, i) {
-                        if (d.id==id){
-                            $scope.linesData.splice(i, i);
-                            return true;
-                        }
-                    });
-                }
+            // Fetch city finance data and add it to linesData
+            function isCityLoaded(id) {
+                return ($scope.linesData.filter(function(d){return (id==d.id)}).length > 0)
             }
-            // take first map
-            $scope.year = $scope.timemap.maps[0].year;
-            $scope.opacity = 0.8;
-            function findMapData(year){
-                return $scope.timemap.maps.filter(function(m) {
-                    return (m.year == year)
-                })[0];
-            }
-            $scope.mapData = findMapData($scope.timemap.maps[0].year);
             $scope.loadCityFinance = function(id) {
-                function checkLine(id) {
-                    return ($scope.linesData.filter(function(d){return (id==d.id)}).length > 0)
-                }
-                if  (checkLine(id)) {
+                if  (isCityLoaded(id)) {
                     return ;
                 }
                 Resource('finance').get(id).then(function(results) {
@@ -182,22 +135,102 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                     var res = results.map(function(d){
                         return [d.year, parseFloat(d.data[$scope.timemap.var_name])];
                     })
-                    if (!checkLine(id)) {
+                    if (!isCityLoaded(id)) {
                         $scope.linesData.push({name: results[0].name, data: res, color: colors(results[0].name), id: id});
                     }
                 });
             }
-            $scope.onClick = function(data) {
-                $scope.loadCityFinance(data.id);
-                $scope.$apply();
+
+            $scope.getCities = CitySearch.get;
+            $scope.centerMapAndLoadStatCity = function(city) {
+                // first update map
+                $scope.mapOptions = {
+                    zoom: 8,
+                    lat: city.lat,
+                    lng: city.lng
+                }
+
+                // then get stats of the city
+                //$scope.loadCityFinance(city.id);
+                $state.transitionTo('maps.detail', {
+                    var_name: $stateParams.var_name,
+                });
+            };
+
+            // Data for line chart
+            $scope.linesData = [
+                {
+                    name: 'FRANCE',
+                    data: $scope.stats.filter(function(stat){
+                        return (stat.var_name == $stateParams.var_name)
+                    })[0].mean_by_year,
+                    color: colors('FRANCE')
+                }
+            ];
+
+            // get the timemap for this variable
+            $scope.timemap = $scope.timemaps.filter(function(timemap) {
+                return (timemap.var_name == $stateParams.var_name)
+            })[0];
+
+            $scope.removeLine = function(id) {
+                // make impossible to remove france
+                if (id) {
+                    $scope.linesData.some(function(d, i) {
+                        if (d.id==id){
+                            $scope.linesData.splice(i, i);
+                            return true;
+                        }
+                    });
+                }
             }
-            $scope.onMouseOver = function(data) {
+
+            // Maps config
+            function findMapData(year){
+                return $scope.timemap.maps.filter(function(m) {
+                    return (m.year == year)
+                })[0];
+            }
+            // take first map
+            $scope.year = $scope.timemap.maps[0].year;
+            $scope.opacity = 0.8;
+            $scope.mapData = findMapData($scope.timemap.maps[0].year);
+
+            $scope.$on('onMapMouseOver', function(e, data) {
                 $scope.mouseOverdata = data;
                 $scope.$apply();
+            });
+
+            // Handle load of city finance data
+            function loadCityFinanceIdsFromState() {
+                if (!$stateParams.ids) return;
+                $stateParams.ids.split(",").forEach(function(id) {
+                    $scope.loadCityFinance(+id);
+                });
             }
-            document.data = $scope.linesData;
+            loadCityFinanceIdsFromState();
+
+            $scope.$watch('linesData', function(newval, oldval) {
+                var ids = newval.filter(function(d) { return (d.id)})
+                    .map(function(d) {return d.id});
+                if (ids.length == 0) return;
+                $state.transitionTo('maps.detail', {
+                    var_name: $stateParams.var_name,
+                    ids: ids.join(',')
+                }, {
+                    reloadOnSearch: false,
+                    notify:false
+                });
+            }, true);
+
+            // map interaction
+            $scope.$on('onMapClick', function(e, data) {
+                if (!data) return;
+                $scope.loadCityFinance(data.id)
+                $scope.$apply();
+            });
         }])
-    .directive('leafletMap', function (mapUtils) {
+    .directive('leafletMap', function ($rootScope, mapUtils) {
         return {
             restrict: "A",
             replace: false,
@@ -286,14 +319,16 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
 
                     //Events
                     currentUtfGrid.on('click', function (e) {
-                        if (e.data) {
-                            onClick(e.data);
-                        }
+                        $rootScope.$broadcast('onMapClick', e.data);
+                        //if (e.data) {
+                        //    onClick(e.data);
+                        //}
                     });
                     currentUtfGrid.on('mouseover', function (e) {
-                        if (e.data) {
-                            onMouseOver(e.data);
-                        }
+                        $rootScope.$broadcast('onMapMouseOver', e.data);
+                        //if (e.data) {
+                        //    onMouseOver(e.data);
+                        //}
                     });
                     currentUtfGrid.on('mouseout', function (e) {
                     });
