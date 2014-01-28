@@ -15,43 +15,43 @@ from .models import DBSession, AdminZone, AdminZoneFinance, Stats, SRID, ADMIN_L
 POP_VAR = cast(AdminZoneFinance.data['population'], Float)
 
 MAPS_CONFIG = {
-    'debt_per_person': {
+    'charges-financiere-par-personne': {
         'description': u'Charges financières annuelles par commune par habitant (en €)',
         'sql_variable': cast(AdminZoneFinance.data['debt_annual_costs'], Float) / POP_VAR,
         'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['debt_annual_costs'] <> 'nan'),
         'colors': lambda size: brewer2mpl.get_map('YlGnBu', 'Sequential', size)
     },
-    'property_tax_rate': {
+    'taxe-fonciere': {
         'description': u'Taxe foncière par commune (en %)',
         'sql_variable': cast(AdminZoneFinance.data['property_tax_rate'], Float),
         'sql_filter': AdminZoneFinance.data['property_tax_rate'] <> 'nan',
         'colors': lambda size: brewer2mpl.get_map('YlOrRd', 'Sequential', size)
     },
-    'home_tax_rate': {
+    'taxe-habitation': {
         'description': u'Taxe d\'habitation par commune (en %)',
         'sql_variable': cast(AdminZoneFinance.data['home_tax_rate'], Float),
         'sql_filter': AdminZoneFinance.data['home_tax_rate'] <> 'nan',
         'colors': lambda size: brewer2mpl.get_map('PuRd', 'Sequential', size)
     },
-    'property_tax_value_per_person': {
+    'taxe-fonciere-par-personne': {
         'description': u'Taxe foncière par commune par habitant (en €)',
         'sql_variable': cast(AdminZoneFinance.data['property_tax_value'], Float) / POP_VAR,
         'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['property_tax_value'] <> 'nan'),
         'colors': lambda size: brewer2mpl.get_map('OrRd', 'Sequential', size)
     },
-    'home_tax_value_per_person': {
+    'taxe-habitation-par-personne': {
         'description': u'Taxe d\'habitation par commune par habitant (en €)',
         'sql_variable': cast(AdminZoneFinance.data['home_tax_value'], Float) / POP_VAR,
         'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['home_tax_value'] <> 'nan'),
         'colors': lambda size: brewer2mpl.get_map('BuPu', 'Sequential', size)
     },
-    'operating_revenues_per_person': {
+    'produits-fonctionnement-par-personne': {
         'description': u'Total des produits de fonctionnement par commune par habitant (en €)',
         'sql_variable': cast(AdminZoneFinance.data['operating_revenues'], Float) / POP_VAR,
         'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['operating_revenues'] <> 'nan'),
         'colors': lambda size: brewer2mpl.get_map('Spectral', 'Diverging', size)
     },
-    'operating_costs_per_person': {
+    'charges-fonctionnement-par-personne': {
         'description': u'Total des charges de fonctionnement par commune par habitant (en €)',
         'sql_variable': cast(AdminZoneFinance.data['operating_costs'], Float) / POP_VAR,
         'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['operating_costs'] <> 'nan'),
