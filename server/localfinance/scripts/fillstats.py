@@ -40,7 +40,7 @@ def main(argv=sys.argv):
 
     # Delete stats
     with transaction.manager:
-        DBSession.query(Stats).filter(Stats.name.in_(map_ids)).delete()
+        DBSession.query(Stats).filter(Stats.name.in_(map_ids)).delete(synchronize_session=False)
 
     # compute some stats for variables used for maps
     for map_id in map_ids:
