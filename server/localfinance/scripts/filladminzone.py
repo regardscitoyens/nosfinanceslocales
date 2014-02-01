@@ -38,6 +38,7 @@ def extract_adminzone_data(city):
     if '-ARRONDISSEMENT' in properties['NOM_COMM']:
         admin_level = ADMIN_LEVEL_CITY_ARR
     return {'name': properties['NOM_COMM'],
+            'population': properties['POPULATION'] * 1000,
             'code_department': properties['CODE_DEPT'],
             'code_city': properties['CODE_COMM'],
             'admin_level': admin_level,
@@ -74,16 +75,18 @@ def main(argv=sys.argv):
     ]
     with transaction.manager:
         for city in cities_with_arr:
-            wkt_geoms = zip(*DBSession.query(func.ST_AsText(AdminZone.geometry))\
+            wkt_geoms, populations = zip(*DBSession.query(func.ST_AsText(AdminZone.geometry), AdminZone.population)\
                 .filter(AdminZone.name.contains(city['name']))\
                 .filter(AdminZone.admin_level==ADMIN_LEVEL_CITY_ARR)\
-                .all())[0]
+                .all())
             city_geom = cascaded_union([loads(wkt_geom) for wkt_geom in wkt_geoms])
             if city_geom.type == 'Polygon':
                 city_geom = MultiPolygon([city_geom])
             az = AdminZone(
                 geometry="SRID=%s;"%SRID + city_geom.wkt, admin_level=ADMIN_LEVEL_CITY,
-                name=city['name'], code_city=city['code_city'], code_department=city['code_department']
+                name=city['name'], code_city=city['code_city'],
+                code_department=city['code_department'],
+                population=sum(populations),
                 )
             DBSession.add(az)
 

@@ -17,14 +17,15 @@ city_search = Service(name='city_search', path='/city_search', description="city
 def get_city(request):
     term = request.params['term']
     term_ascii = unicodedata.normalize('NFKD', unicode(term)).encode('ascii', 'ignore').lower()
-    results = DBSession.query(AdminZone.id, AdminZone.name, AdminZone.code_insee,
+    results = DBSession.query(AdminZone.id, AdminZone.name, AdminZone.code_department,
                              func.ST_X(func.ST_Centroid(AdminZone.geometry)),
                              func.ST_Y(func.ST_Centroid(AdminZone.geometry)))\
-        .filter(func.lower(AdminZone.name).like(term_ascii+"%"))\
+        .filter(AdminZone.name % term_ascii)\
         .filter(AdminZone.admin_level==ADMIN_LEVEL_CITY)\
-        .order_by(func.similarity(AdminZone.name, term).desc()).all()
+        .order_by(func.levenshtein(func.lower(AdminZone.name), term_ascii), AdminZone.population.desc())\
+        .limit(10).all()
     def format(result):
-        return {'id': result[0], 'name': result[1], 'code_insee': result[2],
+        return {'id': result[0], 'name': result[1], 'code_department': result[2],
                 'lng': result[3], 'lat': result[4]}
     return {'results': [format(res) for res in results]}
 

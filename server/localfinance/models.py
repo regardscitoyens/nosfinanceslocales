@@ -43,6 +43,9 @@ class AdminZone(Base):
     name = Column(Unicode(100))
     geometry = Column(Geometry('MULTIPOLYGON', srid=SRID, management=True))
 
+    # denormalized column to rank search result
+    population = Column(Integer)
+
     @hybrid_property
     def code_insee(self):
         return self.code_department + self.code_city

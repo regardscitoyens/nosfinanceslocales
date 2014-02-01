@@ -37,7 +37,7 @@
           <i ng-show="!loadingLocations" class="glyphicon glyphicon-search"></i>
           <i ng-show="loadingLocations" class="glyphicon glyphicon-refresh"></i>
         </span>
-        <input type="text" ng-model="city" placeholder="Rechercher une commune..." typeahead="city as city.name for city in getCities($viewValue) | filter:$viewValue" typeahead-loading="loadingLocations" typeahead-min-length="2" class="form-control" typeahead-on-select="centerMapAndLoadStatCity(city)">
+        <input type="text" ng-model="city" placeholder="Rechercher une commune..." typeahead="city as city.name + ' (' + city.code_department + ')'  for city in getCities($viewValue) | filter:$viewValue" typeahead-loading="loadingLocations" typeahead-min-length="2" class="form-control" typeahead-on-select="centerMapAndLoadStatCity(city)">
       </div>
     </div>
     </br>
