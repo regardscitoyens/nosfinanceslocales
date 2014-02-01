@@ -11,7 +11,10 @@
 <div class="row">
   <div class="col-md-7">
     <div class="row">
-      <input type="range" ng-model="year" value="2000" min="2000" max="2012" step="0.1" style="width:95%">
+      <input type="range" ng-model="year" value="{{maxYear}}" min="{{minYear}}" max="2012" step="0.1" style="width:95%">
+    </div>
+    </br>
+    <div class="row">
       <div leaflet-map style="width:95%;height:650px" timemap="timemap" year="year" on-click="onClick" on-mouse-over="onMouseOver" on-mouse-out="onMouseOut" options="mapOptions" variables="{year: year, opacity: opacity}"></div>
     </div>
     <div class="row">
@@ -19,7 +22,7 @@
         <div class='legend-scale'>
           <ul class='legend-labels'>
             <li ng-repeat="color in mapData.scale_colors">
-            <span style='background:{{color}};'></span>
+            <span style='background:{{color}};opacity:{{opacity}}'></span>
             {{mapData.scale_range[$index]|number:2}}
             </li>
           </ul>

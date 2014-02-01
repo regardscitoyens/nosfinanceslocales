@@ -88,7 +88,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                     }
                 })
                 .state('maps.detail', {
-                    url: '/{var_name:[0-9a-zA-Z_]+}?ids',
+                    url: '/{var_name}?ids',
                     views: {
                         '': {
                             templateUrl: TEMPLATE_URL + '/map.detail.html',
@@ -133,7 +133,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                     // get var_name stat
                     var res = results.map(function(d){
                         return [d.year, parseFloat(d.data[$scope.timemap.var_name])];
-                    })
+                    });
                     if (!isCityLoaded(id)) {
                         $scope.linesData.push({name: results[0].name, data: res, color: colors(results[0].name), id: id});
                     }
@@ -188,8 +188,12 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 })[0];
             }
             // take first map
-            $scope.year = $scope.timemap.maps[0].year;
-            $scope.opacity = 0.8;
+            $scope.minYear = $scope.timemap.maps[0].year;
+            // Add maxYear but cannot be used in the range input because it's
+            // not taken into account for an unknown reason
+            $scope.maxYear = $scope.timemap.maps[$scope.timemap.maps.length-1].year;
+            $scope.year = $scope.maxYear;
+            $scope.opacity = 0.75;
             $scope.mapData = findMapData($scope.timemap.maps[0].year);
 
             $scope.$on('onMapMouseOver', function(e, data) {
