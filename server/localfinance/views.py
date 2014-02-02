@@ -36,6 +36,10 @@ class City(object):
                 'lng': result[3], 'lat': result[4]}
     def __init__(self, request):
         self.request = request
+    def get(self, request):
+        id = self.request.matchdict['id']
+        return {'results': self.format_city_res(DBSession.query(*self.az_columns).filter(AdminZone.id==id).first())}
+
     def collection_get(self):
         ids = self.request.params['ids'].split(',')
         return {'results': [self.format_city_res(res) for res in DBSession.query(*self.az_columns).filter(AdminZone.id.in_(ids)).all()]}
