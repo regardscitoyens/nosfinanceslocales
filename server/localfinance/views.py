@@ -4,30 +4,41 @@ import os
 import json
 import unicodedata
 from sqlalchemy import func
-from pyramid.view import view_config
-from pyramid.response import FileResponse
 from cornice import Service
-from cornice.resource import resource, view
+from cornice.resource import resource
 from .models import AdminZoneFinance, DBSession, AdminZone, Stats as StatsModel, ADMIN_LEVEL_CITY
 from .maps import timemap_registry, MAPS_CONFIG
 
 city_search = Service(name='city_search', path='/city_search', description="city search")
 
+
+
 @city_search.get()
 def get_city(request):
     term = request.params['term']
     term_ascii = unicodedata.normalize('NFKD', unicode(term)).encode('ascii', 'ignore').lower()
-    results = DBSession.query(AdminZone.id, AdminZone.name, AdminZone.code_department,
-                             func.ST_X(func.ST_Centroid(AdminZone.geometry)),
-                             func.ST_Y(func.ST_Centroid(AdminZone.geometry)))\
+    results = DBSession.query(*City.az_columns)\
         .filter(AdminZone.name % term_ascii)\
         .filter(AdminZone.admin_level==ADMIN_LEVEL_CITY)\
         .order_by(func.levenshtein(func.lower(AdminZone.name), term_ascii), AdminZone.population.desc())\
         .limit(10).all()
-    def format(result):
+    return {'results': [City.format_city_res(res) for res in results]}
+
+
+@resource(collection_path='/cities', path='/city/{id}')
+class City(object):
+    az_columns = (AdminZone.id, AdminZone.name, AdminZone.code_department,
+                  func.ST_X(func.ST_Centroid(AdminZone.geometry)),
+                  func.ST_Y(func.ST_Centroid(AdminZone.geometry)))
+    @staticmethod
+    def format_city_res(result):
         return {'id': result[0], 'name': result[1], 'code_department': result[2],
                 'lng': result[3], 'lat': result[4]}
-    return {'results': [format(res) for res in results]}
+    def __init__(self, request):
+        self.request = request
+    def collection_get(self):
+        ids = self.request.params['ids'].split(',')
+        return {'results': [self.format_city_res(res) for res in DBSession.query(*self.az_columns).filter(AdminZone.id.in_(ids)).all()]}
 
 @resource(collection_path='/timemaps', path='/timemap/{id}')
 class TimeMap(object):
