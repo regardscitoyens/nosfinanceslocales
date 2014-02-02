@@ -15,44 +15,44 @@ from .models import DBSession, AdminZone, AdminZoneFinance, Stats, SRID, ADMIN_L
 POP_VAR = cast(AdminZoneFinance.data['population'], Float)
 
 MAPS_CONFIG = {
-    'charges-financieres-par-personne': {
-        'description': u'Charges financières annuelles par commune par habitant (en €)',
+    'charges-financieres-par-habitant': {
+        'description': u'Charges financières annuelles par habitant (en €)',
         'sql_variable': cast(AdminZoneFinance.data['financial_costs'], Float) / POP_VAR,
         'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['financial_costs'] <> 'nan'),
         'colors': lambda size: brewer2mpl.get_map('YlGnBu', 'Sequential', size)
     },
     'taxe-fonciere': {
-        'description': u'Taxe foncière par commune (en %)',
+        'description': u'Taxe foncière (en %)',
         'sql_variable': 100*cast(AdminZoneFinance.data['property_tax_rate'], Float),
         'sql_filter': AdminZoneFinance.data['property_tax_rate'] <> 'nan',
         'colors': lambda size: brewer2mpl.get_map('YlOrRd', 'Sequential', size)
     },
     'taxe-habitation': {
-        'description': u'Taxe d\'habitation par commune (en %)',
+        'description': u'Taxe d\'habitation (en %)',
         'sql_variable': 100*cast(AdminZoneFinance.data['home_tax_rate'], Float),
         'sql_filter': AdminZoneFinance.data['home_tax_rate'] <> 'nan',
         'colors': lambda size: brewer2mpl.get_map('PuRd', 'Sequential', size)
     },
     'produits-taxe-fonciere-par-habitant': {
-        'description': u'Taxe foncière par commune par habitant (en €)',
+        'description': u'Taxe foncière par habitant (en €)',
         'sql_variable': cast(AdminZoneFinance.data['property_tax_value'], Float) / POP_VAR,
         'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['property_tax_value'] <> 'nan'),
         'colors': lambda size: brewer2mpl.get_map('OrRd', 'Sequential', size)
     },
     'produits-taxe-habitation-par-habitant': {
-        'description': u'Taxe d\'habitation par commune par habitant (en €)',
+        'description': u'Taxe d\'habitation par habitant (en €)',
         'sql_variable': cast(AdminZoneFinance.data['home_tax_value'], Float) / POP_VAR,
         'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['home_tax_value'] <> 'nan'),
         'colors': lambda size: brewer2mpl.get_map('BuPu', 'Sequential', size)
     },
     'produits-fonctionnement-par-habitant': {
-        'description': u'Total des produits de fonctionnement par commune par habitant (en €)',
+        'description': u'Total des produits de fonctionnement par habitant (en €)',
         'sql_variable': cast(AdminZoneFinance.data['operating_revenues'], Float) / POP_VAR,
         'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['operating_revenues'] <> 'nan'),
         'colors': lambda size: brewer2mpl.get_map('Spectral', 'Diverging', size)
     },
     'charges-fonctionnement-par-habitant': {
-        'description': u'Total des charges de fonctionnement par commune par habitant (en €)',
+        'description': u'Total des charges de fonctionnement par habitant (en €)',
         'sql_variable': cast(AdminZoneFinance.data['operating_costs'], Float) / POP_VAR,
         'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['operating_costs'] <> 'nan'),
         'colors': lambda size: brewer2mpl.get_map('BrBG', 'Diverging', size),
