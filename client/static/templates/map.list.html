@@ -1,9 +1,8 @@
 <div class="page-header">
-  <h3> NosFinancesLocales.fr : les comptes de toutes les communes de France de 2000 à 2012 en carto</h3>
-  <small> Données disponibles sur <a href="http://www.nosdonnees.fr/dataset/donnees-comptables-et-fiscales-des-collectivites-locales">NosDonnées.fr</a> en <img src="/static/img/opendata.png" height="15"></small>
-  </div>
-  <div class="row">
-      </div>
+  <h3>NosFinancesLocales.fr&nbsp;: les comptes de toutes les communes de France de 2000 à 2012 en carto</h3>
+  <small>Données disponibles sur <a href="http://www.nosdonnees.fr/dataset/donnees-comptables-et-fiscales-des-collectivites-locales">NosDonnées.fr</a> en <img src="/static/img/opendata.png" height="15"/></small>
+</div>
+<div class="row"></div>
 <div class="row">
   <div class="col-md-3" ng-repeat="timemap in timemaps">
     <div class="thumbnail">
@@ -17,12 +16,12 @@
         </slide>
       </carousel>
       <div class="caption">
-        <h4><a ui-sref="maps.detail({var_name:timemap.var_name})">{{timemap.maps[0].description|limitTo:42}}...</a></h3>
+        <h4><a ui-sref="maps.detail({var_name:timemap.var_name})">{{timemap.maps[0].description|limitTo:42}}…</a></h3>
         <p>
-          Moyenne : {{timemap.maps[timemap.maps.length-1].scale_range[5]|number:2}}
+          Moyenne&nbsp;: {{timemap.maps[timemap.maps.length-1].scale_range[5]|number:2}}
         </p>
         <p>
-          Min-Max : {{timemap.maps[timemap.maps.length-1].scale_range[0]|number:2}} - {{timemap.maps[timemap.maps.length-1].scale_range[9]|number:2}}
+          Min-Max&nbsp;: {{timemap.maps[timemap.maps.length-1].scale_range[0]|number:2}} - {{timemap.maps[timemap.maps.length-1].scale_range[9]|number:2}}
         </p>
       </div>
     </div>
