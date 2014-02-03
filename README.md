@@ -1,8 +1,8 @@
-# nosfinanceslocales.fr
+# NosFinancesLocales.fr
 
-This is the code in production for the website [www.nosfinanceslocales.fr](www.nosfinanceslocales.fr).
+This is the code in production for the website [NosFinancesLocales.fr](http://www.nosfinanceslocales.fr).
 
-The main goal of this project is to illustrate [french city financial data](http://www.nosdonnees.fr/dataset/donnees-comptables-et-fiscales-des-collectivites-locales) recently freed by [Regards Citoyens](www.regardscitoyens).
+The main goal of this project is to illustrate [french cities financial data](http://www.nosdonnees.fr/dataset/donnees-comptables-et-fiscales-des-collectivites-locales) recently freed by [Regards Citoyens](http://www.regardscitoyens.org).
 
 It is also an opportunity to show server and client code and how to install such a stack. Special thanks to these awesome projects:
  * [mapnik](http://mapnik.org/) for cartography
