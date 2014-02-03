@@ -334,6 +334,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                         });
                         if (found.length==0) {
                             lmap.removeLayer(cityMarkers[cityId]);
+                            delete cityMarkers[cityId];
                         }
                     });
                     // add new marker
