@@ -54,6 +54,7 @@
       <a class="btn btn-primary btn-xs" style="background-color:{{linesData[0].color}};margin-right:3px;margin-bottom:2px;border-color:{{linesData[0].color}}" ng-click="removeLine(linesData[0].id)" popover="Moyenne sur toutes les communes de France. À prendre avec précaution car les communes sont très hétérogènes (responsabilité, population, tourisme, etc.)." popover-title="Indicateur France&nbsp;:"><b>{{linesData[0].name}}</b></a>
       <a class="btn btn-primary btn-xs" style="background-color:{{lineData.color}};margin-right:3px;margin-bottom:2px;border-color:{{lineData.color}}" ng-click="removeLine(lineData.id)" ng-repeat="lineData in linesData.slice(1)"><b>{{lineData.name}}</b></a>
       <div line-chart data="linesData" name="test"></div>
+      <div class="col-md-12"><small><b>NB&nbsp;: Les variables exprimées en euros sont en euros courants.</b></small></div>
     </div>
     <div class="row">
       <h4><span class="label label-default">Opacité</span></h4>
