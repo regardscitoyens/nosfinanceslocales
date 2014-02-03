@@ -205,11 +205,8 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 })[0];
             }
             // take first map
-            $scope.minYear = $scope.timemap.maps[0].year;
-            // Add maxYear but cannot be used in the range input because it's
-            // not taken into account for an unknown reason
-            $scope.maxYear = $scope.timemap.maps[$scope.timemap.maps.length-1].year;
-            $scope.year = $scope.maxYear;
+            $scope.years = $scope.timemap.maps.map(function(map){return map.year});
+            $scope.year = $scope.years[$scope.years.length-1];
             $scope.opacity = 0.75;
             $scope.mapData = findMapData($scope.timemap.maps[0].year);
 
@@ -505,7 +502,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 var max = $scope.values[$scope.values.length-1];
                 var x = d3.time.scale()
                     .domain([new Date(min, 0, 1), new Date(max, 0, 1)])
-                    .range([-15, element[0].offsetWidth-25]);
+                    .range([-15, element[0].offsetWidth-23]);
 
                 var xAxis = d3.svg.axis()
                     .scale(x);

@@ -9,9 +9,9 @@
 </div>
 <div class="row">
   <div class="col-md-7">
-      <input type="range" ng-model="year" value="{{maxYear}}" min="{{minYear}}" max="2012" step="0.1" style="width:100%">
+      <input type="range" ng-model="year" value="{{years[years.length-1]}}" min="{{years[0]}}" max="2012" step="0.1" style="width:100%">
       <div class="row">
-        <div xaxis values="[2000, 2001, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012]"></div>
+        <div xaxis values="years"></div>
       </div>
     <div class="row">
       <div class="col-md-12">
