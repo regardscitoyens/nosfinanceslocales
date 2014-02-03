@@ -158,6 +158,9 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
 
                 // then get stats of the city
                 $scope.loadCityFinance(city.id);
+                if (!isCityLoaded(city.id)) {
+                    $scope.cities.push(city);
+                }
             };
 
             // Data for line chart
