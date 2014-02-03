@@ -1,0 +1,27 @@
+<div id="wrap">
+  <div class="navbar navbar-default navbar-fixed-top mynav" role="navigation">
+    <div class="container">
+      <div class="navbar-header">
+        <a ui-sref="maps" class="navbar-brand">NosFinancesLocales.fr</a>
+      </div>
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li ui-sref-active="active"><a ui-sref="maps.about">A propos</a></li>
+          <li>
+          <a class="dropdown-toggle" href="#">Les cartes</a>
+          <ul class="dropdown-menu">
+            <li ng-repeat="timemap in timemaps">
+              <a ui-sref="maps.detail({var_name:timemap.var_name})">{{timemap.maps[0].description}}</a>
+            </li>
+          </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div ui-view class="container" autoscroll='false'>
+  </div>
+  </br>
+</div>
+<div id="footer"></div>

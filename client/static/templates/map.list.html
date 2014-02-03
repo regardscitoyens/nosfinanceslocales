@@ -19,10 +19,10 @@
       <div class="caption">
         <h4><a ui-sref="maps.detail({var_name:timemap.var_name})">{{timemap.maps[0].description|limitTo:42}}...</a></h3>
         <p>
-          Médiane: {{timemap.maps[0].scale_range[5]|number:2}}
+          Moyenne : {{timemap.maps[timemap.maps.length-1].scale_range[5]|number:2}}
         </p>
         <p>
-          Min-Max: {{timemap.maps[0].scale_range[0]|number:2}} - {{timemap.maps[0].scale_range[9]|number:2}}
+          Min-Max : {{timemap.maps[timemap.maps.length-1].scale_range[0]|number:2}} - {{timemap.maps[timemap.maps.length-1].scale_range[9]|number:2}}
         </p>
       </div>
     </div>

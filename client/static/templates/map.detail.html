@@ -2,30 +2,29 @@
   <h3>
     {{mapData.description}}
   </h3>
+  <div ng-include="templateUrl"></div>
   <div class="col-md-8">
-    <div class="row">
-      <h4>Année : <span class="label label-danger">{{year}}</span></h4>
-    </div>
+    <h4>Année : <span class="label label-danger">{{year|roundToInt}}</span></h4>
   </div>
 </div>
 <div class="row">
   <div class="col-md-7">
+      <input type="range" ng-model="year" value="{{maxYear}}" min="{{minYear}}" max="2012" step="0.1" style="width:100%">
+      <div class="row">
+        <div xaxis values="[2000, 2001, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012]"></div>
+      </div>
     <div class="row">
-      <input type="range" ng-model="year" value="{{maxYear}}" min="{{minYear}}" max="2012" step="0.1" style="width:95%">
-    </div>
-    </br>
-    <div class="row">
-      <div leaflet-map style="width:95%;height:650px" timemap="timemap" year="year" on-click="onClick" on-mouse-over="onMouseOver" on-mouse-out="onMouseOut" options="mapOptions" variables="{year: year, opacity: opacity}"></div>
-    </div>
-    <div class="row">
-      <div class='legend'>
-        <div class='legend-scale'>
-          <ul class='legend-labels'>
-            <li ng-repeat="color in mapData.scale_colors">
-            <span style='background:{{color}};opacity:{{opacity}}'></span>
-            {{mapData.scale_range[$index]|number:2}}
-            </li>
-          </ul>
+      <div class="col-md-12">
+        <div leaflet-map style="height:650px" timemap="timemap" cities="cities" year="year" on-click="onClick" on-mouse-over="onMouseOver" on-mouse-out="onMouseOut" options="mapOptions" variables="{year: year, opacity: opacity}"></div>
+        <div class='legend'>
+          <div class='legend-scale'>
+            <ul class='legend-labels'>
+              <li ng-repeat="color in mapData.scale_colors">
+              <span style='background:{{color}};opacity:{{opacity}}'></span>
+              {{mapData.scale_range[$index]|number:2}}
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -44,8 +43,8 @@
     <div class="row">
       <h4><span class="label label-default"><span class="glyphicon glyphicon-eye-open"></span> Info commune survolée</span></h4>
       <ul class="list-group">
-        <li class="list-group-item">Commune: <b>{{mouseOverdata.name}} ({{mouseOverdata.code_insee}})</b></li>
-        <li class="list-group-item">Année: <b>{{year}}</b></li>
+        <li class="list-group-item">Commune: <b>{{mouseOverdata.name}} ({{mouseOverdata.code_insee|limitTo:2}})</b></li>
+        <li class="list-group-item">Année: <b>{{year|roundToInt}}</b></li>
         <li class="list-group-item">{{mapData.description}}: <b>{{mouseOverdata[timemap.var_name]|number:2}}</b></li>
       </ul>
     </div>

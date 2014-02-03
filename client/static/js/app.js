@@ -46,29 +46,18 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
             }
         }
     })
+    .filter('roundToInt', function () {
+        return function (n) {
+            return Math.round(n, 0);
+        };
+    })
     .config(
         [ '$stateProvider', '$urlRouterProvider', 'TEMPLATE_URL',
         function ($stateProvider, $urlRouterProvider, TEMPLATE_URL) {
             $urlRouterProvider.otherwise('/');
             $stateProvider
-                .state('about', {
-                    url: '/about',
-                    templateUrl: TEMPLATE_URL + '/about.html',
-                })
-                .state('localfinance', {
-                    url: '/{id:[0-9]{1,4}}',
-                    views: {
-                        '': {
-                            templateUrl: TEMPLATE_URL + '/localfinance.detail.html',
-                            controller: 'LocalFinanceDetailCtrl'
-                        },
-                    }
-                })
-                .state('maps', {
-                    abstract: true,
-                    url: '',
-                    templateUrl: TEMPLATE_URL + '/maps.html',
-                    controller: 'MapsCtrl',
+                .state('abstractHome', {
+                    templateUrl: TEMPLATE_URL + '/main.html',
                     resolve: {
                         timemaps: function(Resource) {
                             return Resource('timemap').all()
@@ -76,18 +65,22 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                         stats: function(Resource) {
                             return Resource('stat').all();
                         }
-                    }
+                    },
+                    controller: 'AbstractHomeCtrl'
                 })
-                .state('maps.list', {
+                .state('maps', {
+                    parent: 'abstractHome',
                     url: '/',
-                    views: {
-                        '': {
-                            templateUrl: TEMPLATE_URL + '/map.list.html',
-                            controller: 'MapListCtrl'
-                        }
-                    }
+                    templateUrl: TEMPLATE_URL + '/map.list.html',
+                    controller: 'MapListCtrl'
+                })
+                .state('maps.about', {
+                    parent: 'abstractHome',
+                    url: '/about',
+                    templateUrl: TEMPLATE_URL + '/about.html',
                 })
                 .state('maps.detail', {
+                    parent: 'abstractHome',
                     url: '/{var_name}?ids',
                     views: {
                         '': {
@@ -97,32 +90,41 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                     }
                 })
         }])
-    .controller('Home', ['$scope', '$state',
-        function($scope, $state, stats) {
+    .controller('AbstractHomeCtrl', ['$scope', '$state', 'timemaps', 'stats', 'mapUtils',
+        function($scope, $state, timemaps, stats, mapUtils) {
             $scope.$state = $state;
-            $scope.stats = stats;
-    }])
-    .controller('MapsCtrl', ['$scope', '$state', 'mapUtils', 'timemaps', 'stats',
-        function($scope, $state, mapUtils, timemaps, stats) {
-            $scope.mapUtils = mapUtils;
             $scope.timemaps = timemaps;
             $scope.stats = stats;
+            $scope.mapUtils = mapUtils;
         }])
     .controller('MapListCtrl', ['$scope', '$state', '$timeout',
         function($scope, $state, $timeout) {
             $scope.thumbailUrls = [];
-        }])
-    .controller('MapDetailCtrl', ['$scope', '$state', '$stateParams', 'Resource', 'mapUtils', 'CitySearch',
-        function($scope, $state, $stateParams, Resource, mapUtils, CitySearch) {
+    }])
+    .controller('MapDetailCtrl', ['$scope', '$state', '$stateParams', 'Resource', 'CitySearch', 'TEMPLATE_URL',
+        function($scope, $state, $stateParams, Resource, CitySearch, TEMPLATE_URL) {
+            $scope.templateUrl = TEMPLATE_URL + '/maps/' + $stateParams.var_name + ".html";
             // Colors used for line chart
             var colors = d3.scale.category10();
 
             // Fetch city finance data and add it to linesData
-            function isCityLoaded(id) {
-                return ($scope.linesData.filter(function(d){return (id==d.id)}).length > 0)
+            function isCityFinanceLoaded(id) {
+                return ($scope.linesData.filter(function(d){return (id==d.id)}).length > 0);
             }
+            function isCityLoaded(id) {
+                return ($scope.cities.filter(function(d){return (id==d.id)}).length > 0);
+            }
+
+            $scope.loadCity = function(id) {
+                if (!isCityLoaded(id)) {
+                    Resource('city').get(id).then(function(city) {
+                        $scope.cities.push(city);
+                    });
+                }
+            }
+
             $scope.loadCityFinance = function(id) {
-                if  (isCityLoaded(id)) {
+                if  (isCityFinanceLoaded(id)) {
                     return ;
                 }
                 Resource('finance').get(id).then(function(results) {
@@ -134,8 +136,13 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                     var res = results.map(function(d){
                         return [d.year, parseFloat(d.data[$scope.timemap.var_name])];
                     });
-                    if (!isCityLoaded(id)) {
-                        $scope.linesData.push({name: results[0].name, data: res, color: colors(results[0].name), id: id});
+                    if (!isCityFinanceLoaded(id)) {
+                        $scope.linesData.push({
+                            name: results[0].name,
+                            data: res,
+                            color: colors(results[0].name),
+                            id: id
+                            });
                     }
                 });
             }
@@ -164,6 +171,8 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 }
             ];
 
+            $scope.cities = [];
+
             // get the timemap for this variable
             $scope.timemap = $scope.timemaps.filter(function(timemap) {
                 return (timemap.var_name == $stateParams.var_name)
@@ -174,7 +183,15 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 if (id) {
                     $scope.linesData.some(function(d, i) {
                         if (d.id==id){
-                            $scope.linesData.splice(i, i);
+                            $scope.linesData.splice(i, 1);
+                            return true;
+                        }
+                    });
+                    // XXX this is ugly to copy that...
+                    // TODO: Review all this part
+                    $scope.cities.some(function(d, i) {
+                        if (d.id==id){
+                            $scope.cities.splice(i, 1);
                             return true;
                         }
                     });
@@ -202,31 +219,41 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
             });
 
             // Handle load of city finance data
-            function loadCityFinanceIdsFromState() {
+            function loadCityDataIdsFromState() {
                 if (!$stateParams.ids) return;
                 $stateParams.ids.split(",").forEach(function(id) {
                     $scope.loadCityFinance(+id);
+                    $scope.loadCity(+id);
                 });
             }
-            loadCityFinanceIdsFromState();
+            loadCityDataIdsFromState();
 
             $scope.$watch('linesData', function(newval, oldval) {
                 var ids = newval.filter(function(d) { return (d.id)})
                     .map(function(d) {return d.id});
-                if (ids.length == 0) return;
-                $state.transitionTo('maps.detail', {
-                    var_name: $stateParams.var_name,
-                    ids: ids.join(',')
-                }, {
-                    reloadOnSearch: false,
-                    notify:false
-                });
+                if (ids.length>0) {
+                    $state.transitionTo('maps.detail', {
+                        var_name: $stateParams.var_name,
+                        ids: ids.join(',')
+                    }, {
+                        reloadOnSearch: false,
+                        notify:false
+                    });
+                } else {
+                    $state.transitionTo('maps.detail', {
+                        var_name: $stateParams.var_name
+                    }, {
+                        reloadOnSearch: false,
+                        notify:false
+                    });
+                }
             }, true);
 
             // map interaction
             $scope.$on('onMapClick', function(e, data) {
                 if (!data) return;
                 $scope.loadCityFinance(data.id)
+                $scope.loadCity(data.id);
                 $scope.$apply();
             });
         }])
@@ -236,6 +263,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
             replace: false,
             scope: {
                 timemap: '=',
+                cities: '=',
                 variables: '=',
                 options: '=',
                 click: '&onClick',
@@ -293,6 +321,31 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
 
                 $scope.$watch('variables', function(newVal, oldVal) {
                     return $scope.render(newVal.opacity, newVal.year);
+                }, true);
+
+                var cityMarkers = {};
+                $scope.$watch('cities', function(newVal, oldVal) {
+                    // remove marker
+                    d3.keys(cityMarkers).forEach(function(cityId) {
+                        var found = newVal.filter(function(city) {
+                            if (cityId == city.id) {
+                                return city;
+                            }
+                        });
+                        if (found.length==0) {
+                            lmap.removeLayer(cityMarkers[cityId]);
+                        }
+                    });
+                    // add new marker
+                    newVal.forEach(function(city) {
+                        if (!cityMarkers[city.id]) {
+                            cityMarkers[city.id] =
+                                L.marker(new L.LatLng(city.lat, city.lng),
+                                    {title: city.name}).addTo(lmap);
+                            cityMarkers[city.id].bindPopup("Commune de <b>" + 
+                                city.name + "</b>");
+                        }
+                    });
                 }, true);
 
                 $scope.render = function(opacity, year) {
@@ -437,6 +490,33 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                 $scope.$watchCollection('data', function(newData, oldData) {
                     $scope.render(newData);
                 });
+            }
+        }
+    })
+    .directive('xaxis', function() {
+        return {
+            restrict: "A",
+            replace: false,
+            scope: {
+                values: '='
+            },
+            link: function($scope, element, attrs, controller) {
+                var min = $scope.values[0];
+                var max = $scope.values[$scope.values.length-1];
+                var x = d3.time.scale()
+                    .domain([new Date(min, 0, 1), new Date(max, 0, 1)])
+                    .range([-15, element[0].offsetWidth-25]);
+
+                var xAxis = d3.svg.axis()
+                    .scale(x);
+
+                var svg = d3.select(element[0]).append("svg")
+                    .attr("width", element[0].offsetWidth + 30)
+                    .attr('height', 20);
+                svg.append("g")
+                    .attr("class", "range axis")
+                    .attr("transform", "translate(0," + 0 + ")")
+                    .call(xAxis);
             }
         }
     });
