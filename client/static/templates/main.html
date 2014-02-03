@@ -10,7 +10,7 @@
           <li>
           <a class="dropdown-toggle" href="#">Les cartes</a>
           <ul class="dropdown-menu">
-            <li ng-repeat="timemap in timemaps">
+            <li ng-repeat="timemap in timemaps" ui-sref-active="active">
               <a ui-sref="maps.detail({var_name:timemap.var_name})">{{timemap.maps[0].description}}</a>
             </li>
           </ul>
