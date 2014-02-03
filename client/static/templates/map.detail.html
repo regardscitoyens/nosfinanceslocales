@@ -4,7 +4,7 @@
   </h3>
   <div ng-include="templateUrl"></div>
   <div class="col-md-8">
-    <h4>Année : <span class="label label-danger">{{year|roundToInt}}</span></h4>
+    <h4>Année&nbsp;: <span class="label label-danger">{{year|roundToInt}}</span></h4>
   </div>
 </div>
 <div class="row">
@@ -43,9 +43,9 @@
     <div class="row">
       <h4><span class="label label-default"><span class="glyphicon glyphicon-eye-open"></span> Info commune survolée</span></h4>
       <ul class="list-group">
-        <li class="list-group-item">Commune: <b>{{mouseOverdata.name}} ({{mouseOverdata.code_insee|limitTo:2}})</b></li>
-        <li class="list-group-item">Année: <b>{{year|roundToInt}}</b></li>
-        <li class="list-group-item">{{mapData.description}}: <b>{{mouseOverdata[timemap.var_name]|number:2}}</b></li>
+        <li class="list-group-item">Commune&nbsp;: <b>{{mouseOverdata.name}} ({{mouseOverdata.code_insee|limitTo:2}})</b></li>
+        <li class="list-group-item">Année&nbsp;: <b>{{year|roundToInt}}</b></li>
+        <li class="list-group-item">{{mapData.description}}&nbsp;: <b>{{mouseOverdata[timemap.var_name]|number:2}}</b></li>
       </ul>
     </div>
     <div class="row">
