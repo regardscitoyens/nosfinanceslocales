@@ -56,6 +56,36 @@ MAPS_CONFIG = {
         'sql_variable': cast(AdminZoneFinance.data['operating_costs'], Float) / POP_VAR,
         'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['operating_costs'] <> 'nan'),
         'colors': lambda size: brewer2mpl.get_map('BrBG', 'Diverging', size),
+    },
+    'emplois-investissements-par-habitant': {
+        'description': u"Total des emplois d'investissements par habitant (en €)",
+        'sql_variable': cast(AdminZoneFinance.data['investments_usage'], Float) / POP_VAR,
+        'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['investments_usage'] <> 'nan'),
+        'colors': lambda size: brewer2mpl.get_map('RdYlBu', 'Diverging', size),
+    },
+    'annuite-dette-par-habitant': {
+        'description': u'Annuité de la dette par habitant (en €)',
+        'sql_variable': cast(AdminZoneFinance.data['debt_annual_costs'], Float) / POP_VAR,
+        'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['debt_annual_costs'] <> 'nan'),
+        'colors': lambda size: brewer2mpl.get_map('Spectral', 'Diverging', size),
+    },
+    'ressources-investissements-par-habitant': {
+        'description': u"Total des ressources d'investissement par habitant (en €)",
+        'sql_variable': cast(AdminZoneFinance.data['investment_ressources'], Float) / POP_VAR,
+        'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['investment_ressources'] <> 'nan'),
+        'colors': lambda size: brewer2mpl.get_map('RdGy', 'Diverging', size),
+    },
+    'charges-personnel-par-habitant': {
+        'description': u'Charges de personnel par habitant (en €)',
+        'sql_variable': cast(AdminZoneFinance.data['staff_costs'], Float) / POP_VAR,
+        'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['staff_costs'] <> 'nan'),
+        'colors': lambda size: brewer2mpl.get_map('Reds', 'Sequential', size),
+    },
+    'subventions-versee-par-habitant': {
+        'description': u'Subventions versées par habitant (en €)',
+        'sql_variable': cast(AdminZoneFinance.data['paid_subsidies'], Float) / POP_VAR,
+        'sql_filter': and_(POP_VAR > 0, AdminZoneFinance.data['paid_subsidies'] <> 'nan'),
+        'colors': lambda size: brewer2mpl.get_map('YlOrBr', 'Sequential', size),
     }
 }
 
@@ -104,7 +134,7 @@ def compile_query(query):
     return str_query.replace(m.group(), m.groups()[0])
 
 def quantile_scale(sql_variable, sql_filter, size):
-    values = zip(*DBSession.query(sql_variable).filter(sql_filter).all())[0]
+    values = map(float, zip(*DBSession.query(sql_variable).filter(sql_filter).all())[0])
     return np.percentile(values, list(np.linspace(0, 100, size+1)))
 
 def get_extent():
