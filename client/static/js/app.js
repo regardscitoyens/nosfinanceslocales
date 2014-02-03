@@ -103,7 +103,8 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
     }])
     .controller('MapDetailCtrl', ['$scope', '$state', '$stateParams', 'Resource', 'CitySearch', 'TEMPLATE_URL',
         function($scope, $state, $stateParams, Resource, CitySearch, TEMPLATE_URL) {
-            $scope.templateUrl = TEMPLATE_URL + '/maps/' + $stateParams.var_name + ".html";
+            $scope.descriptionTemplateUrl = TEMPLATE_URL + '/maps/' + $stateParams.var_name + ".html";
+            $scope.statsTemplateUrl = TEMPLATE_URL + '/maps/stats-info-' + $stateParams.var_name + ".html";
             // Colors used for line chart
             var colors = d3.scale.category10();
 
