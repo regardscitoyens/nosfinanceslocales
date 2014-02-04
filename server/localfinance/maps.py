@@ -222,4 +222,14 @@ class TimeMapRegistry(dict):
     def __missing__(self, key):
         self[key] = [Map(year, key) for year in range(2000, 2013)]
         return self[key]
-timemap_registry = TimeMapRegistry()
+
+# cache timemap registry 'cause it's quite long to get it
+from .cache import region
+@region.cache_on_arguments(namespace="timemaps")
+def create_timemap_registry():
+    registry = TimeMapRegistry()
+    for key in MAPS_CONFIG.keys():
+        registry[key]
+    return registry
+
+timemap_registry = create_timemap_registry()
