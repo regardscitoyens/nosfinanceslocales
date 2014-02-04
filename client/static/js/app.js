@@ -359,9 +359,9 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                         // XXX: find a better way to set opacity for better ux
                         var x = (year-yearLow);
                         if (years[iyear] == yearLow) {
-                            yearsToLayers[yearLow].setOpacity(opacity * (1 - x * x * x));
+                            yearsToLayers[yearLow].setOpacity(opacity * (1-x));
                         } else if (years[iyear] == yearLow+1) {
-                            yearsToLayers[yearLow+1].setOpacity(opacity * (x + x * x)/2);
+                            yearsToLayers[yearLow+1].setOpacity(opacity * (Math.pow(x, 0.4)));
                         } else {
                             yearsToLayers[years[iyear]].setOpacity(0);
                         }
