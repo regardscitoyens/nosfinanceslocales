@@ -3,7 +3,7 @@
     {{mapData.description}}
   </h3>
   <div ng-include="descriptionTemplateUrl"></div>
-  <div class="col-md-8">
+  <div class="col-md-7">
     <h4>Année&nbsp;: <span class="label label-danger">{{year|roundToInt}}</span></h4>
   </div>
 </div>
@@ -19,8 +19,8 @@
         <div class='legend'>
           <div class='legend-scale'>
             <ul class='legend-labels'>
-              <li ng-repeat="color in mapData.scale_colors">
-              <span style='background:{{color}};opacity:{{opacity}}'></span>
+              <li style="width:{{100/mapData.scale_colors.length}}%;" ng-repeat="color in mapData.scale_colors">
+              <span style='width:100%;background:{{color}};opacity:{{opacity}}'></span>
               {{mapData.scale_range[$index]|number:2}}
               </li>
             </ul>
