@@ -1,6 +1,6 @@
 angular.module('app', ['ui.router', 'ui.bootstrap'])
-    .constant('API_ROOT_URL', 'http://www.nosfinanceslocales.fr/api')
-    .constant('TILES_ROOT_URL', 'http://{s}.tile.nosfinanceslocales.fr/tiles') // get this info from server ?
+    .constant('API_ROOT_URL', '/api')
+    .constant('TILES_ROOT_URL', '//{s}.tile.nosfinanceslocales.fr/tiles') // get this info from server ?
     .constant('THUMBNAILS_URL', '/static/thumbnails')
     .constant('TEMPLATE_URL', '/static/templates')
     .factory('mapUtils', function(TILES_ROOT_URL, THUMBNAILS_URL) {
@@ -284,7 +284,7 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                     bounds = L.latLngBounds(southWest, northEast);
                 var stamenAttribution = 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>';
                 var basemap = new L.TileLayer(
-                        "http://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png",
+                        "://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png",
                         {attribution: stamenAttribution});
                 var layers = [basemap];
                 var yearsToLayers = {}, yearsToUtfGrids = {}, currentUtfGrid, years = [];
