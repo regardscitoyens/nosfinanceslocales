@@ -283,8 +283,12 @@ angular.module('app', ['ui.router', 'ui.bootstrap'])
                                          refmap.extent[2]),
                     bounds = L.latLngBounds(southWest, northEast);
                 var stamenAttribution = 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>';
+		stamen_url = "//{s}.tile.stamen.com/toner/{z}/{x}/{y}.png";
+		if ('https:' == document.location.protocol) {
+			stamen_url = "//{s}.tile.nosfinanceslocales.fr/toner/{z}/{x}/{y}.png";
+		}
                 var basemap = new L.TileLayer(
-                        "://{s}.tile.stamen.com/toner/{z}/{x}/{y}.png",
+                        stamen_url,
                         {attribution: stamenAttribution});
                 var layers = [basemap];
                 var yearsToLayers = {}, yearsToUtfGrids = {}, currentUtfGrid, years = [];
